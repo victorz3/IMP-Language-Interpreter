@@ -1,7 +1,9 @@
 import Numeric.Natural
 
+type State = [(Natural, Integer)]
+
 data Program = Skip
-             | Assignment Loc Arithmetic
+             | Assign Loc Arithmetic
              | Concat Program Program
              | If BoolExp Program Program
              | While BoolExp Program deriving (Show)
@@ -21,3 +23,5 @@ data BoolExp = T
 
 data Loc = Loc Natural deriving (Show)
   
+-- Defining a simple eval function just cause
+--eval :: Program -> Integer
