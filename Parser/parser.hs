@@ -1,6 +1,5 @@
 --Parser for while programs
 --Author: Victor Zamora
-
 import Text.Parsec
 
 -- Parses a negative integer.
@@ -14,3 +13,12 @@ negative = do
 integer :: Parsec String () String
 integer = negative <|> many1 digit
 
+--References
+memory :: Parsec String () String
+memory = do
+  string "x["
+  number <- many1 digit
+  char ']'
+  return number
+
+-- Boolean values
