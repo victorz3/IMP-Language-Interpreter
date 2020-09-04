@@ -1,5 +1,7 @@
 --Parser for while programs
 --Author: Victor Zamora
+module Parser where
+
 import Text.ParserCombinators.Parsec
 import Language
 import Numeric.Natural

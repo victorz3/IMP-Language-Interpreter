@@ -1,7 +1,10 @@
 -- Evaluator for our while language expressions.
 -- Author: Victor Zamora
 import Language
+import Parser hiding (main)
 import Numeric.Natural
+import Text.ParserCombinators.Parsec hiding (State)
+
 
 -- Function to get value in a location.
 getValue :: State -> Natural -> Integer
@@ -46,3 +49,21 @@ evalBool (Not b) s = (not (evalBool b s))
 evalBool (Or b1 b2) s = ((evalBool b1 s) || (evalBool b2 s))
 evalBool (And b1 b2) s = ((evalBool b1 s) && (evalBool b2 s))
 
+--Gets the return value from the position x[0]
+getReturnValue0 :: State -> Integer
+getReturnValue0 s = getValue s 0
+
+--Executes the program and returns a value.
+--This function receives a function that gets the return value from the state.
+executeProgram :: Program -> (State -> Integer) -> Integer
+executeProgram p f = f $ eval p []
+
+main =
+  do c <- getContents
+     case parse program "(stdin)" c of
+            Left e -> do putStrLn "Error parsing input:"
+                         print e
+            Right r -> (print (executeProgram r getReturnValue0))
+
+          
+       
