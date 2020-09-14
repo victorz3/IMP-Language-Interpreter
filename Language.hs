@@ -2,11 +2,6 @@
 -- Author: Victor Zamora
 module Language where
 
-import Numeric.Natural
-
---A memory state
-type State = [(Natural, Integer)]
-
 -- A program
 data Program = Skip
              | Assign Loc Arit
@@ -31,5 +26,5 @@ data BoolExp = T
              | And BoolExp BoolExp deriving (Show)
 
 --Memory location
-data Loc = Loc Natural deriving (Show)
+data Loc = Loc Int deriving (Show)
  
