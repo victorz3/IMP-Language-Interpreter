@@ -143,13 +143,19 @@ evalBoolA (And a1 a2) v = do
 getReturnValue0 :: StateL -> Integer
 getReturnValue0 s = getValue s 0
 
+-- Gets the return value of a program using arrays
+getReturnValue0A :: Program -> Int -> ST s Integer
+getReturnValue0A p i = do
+  v <- Vec.replicate i 0
+  evalA p v
+  Vec.read v 0
+
+--Removes ST monad from programs return value (when using arrays)
+
 --Executes the program and returns a value.
 --This function receives a function that gets the return value from the state.
 executeProgram :: Program -> (StateL -> Integer) -> Integer
 executeProgram p f = f $ eval p []
-
---main = do
-  
 
 -- Main for parsing and executing with lists.
 -- main =
@@ -157,8 +163,12 @@ executeProgram p f = f $ eval p []
 --      case parse program "(stdin)" c of
 --             Left e -> do putStrLn "Error parsing input:"
 --                          print e
---             Right r -> (print (executeProgram r getReturnValue0))
-
+--             Right r -> do
+--               v <- Vec.replicate 2 0
+--               evalA r v
+--               print (Vec.read v 0)
+--               return ()
+              
           
 -- main = do
 --   c <- getContents
