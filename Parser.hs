@@ -4,7 +4,6 @@ module Parser where
 
 import Text.ParserCombinators.Parsec
 import Language
-import Numeric.Natural
 
 -- Parses a negative integer.
 negative :: Parser Integer
@@ -32,7 +31,7 @@ memory =
      char '['
      loc <- many1 digit
      char ']'
-     return (Loc (read loc :: Natural))
+     return (Loc (read loc :: Int))
 
 --Converts location to arithmetic expression
 locToArit :: Loc -> Arit
