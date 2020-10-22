@@ -47,6 +47,19 @@ eval (While b p) s = if (evalBool b s) then let sNew = (eval p s)
                                           in (eval (While b p) sNew)
                      else s
 
+--Evaluation function with optional halting parameter.
+-- evalWithHalt :: Program -> Integer -> StateL -> StateL
+-- evalWithHalt Skip _ s = s
+-- evalWithHalt (Assign (Loc x) a) _ s = replace x s (evalArit a s)
+-- evalW (Concat p1 p2) n s = let sNew = (evalWithHalt p1 s)
+--                         in (eval p2 sNew)
+-- eval (If b p1 p2) s = if (evalBool b s) then (eval p1 s)
+--                       else (eval p2 s)
+-- eval (While b p) s = if (evalBool b s) then let sNew = (eval p s)
+--                                           in (eval (While b p) sNew)
+--                      else s
+
+
 -- Evaluation function which uses array locations.
 evalA :: Program -> Vec.MVector s Integer -> ST s ()
 evalA Skip _ = do
@@ -70,9 +83,7 @@ evalA (While b p) v = do
   case boo of
     True -> evalA (Concat p (While b p)) v
     otherwise -> return ()
-  return ()
-  
-    
+  return ()    
   
 -- Evaluates an arithmetic expression
 evalArit :: Arit -> StateL -> Integer
@@ -101,7 +112,6 @@ evalAritA (Times a1 a2) v = do
   e1 <- evalAritA a1 v
   e2 <- evalAritA a2 v
   return (e1 * e2)
-
 
 -- Evaluates a boolean expression
 evalBool :: BoolExp -> StateL -> Bool
@@ -144,18 +154,28 @@ getReturnValue0 :: StateL -> Integer
 getReturnValue0 s = getValue s 0
 
 -- Gets the return value of a program using arrays
-getReturnValue0A :: Program -> Int -> ST s Integer
-getReturnValue0A p i = do
-  v <- Vec.replicate i 0
+-- Using constant array size for now, but eventually will have to allocate.
+getReturnValue0A :: Program -> ST s Integer
+getReturnValue0A p = do
+  v <- Vec.replicate 10000000 0
   evalA p v
   Vec.read v 0
 
---Removes ST monad from programs return value (when using arrays)
+--Removes ST monad from program's return value (when using arrays)
+getIntegerReturnValue :: Program -> Integer 
+getIntegerReturnValue p = runST $ getReturnValue0A p
 
 --Executes the program and returns a value.
 --This function receives a function that gets the return value from the state.
 executeProgram :: Program -> (StateL -> Integer) -> Integer
 executeProgram p f = f $ eval p []
+
+-- Executes the program with the option to halt if, after a number of steps,
+-- the program hasn't halted.
+--executeProgramWithHalt :: Program -> Integer -> (StateL -> Integer) -> Integer
+--executeProgramWithHalt p halt f = f $ evalWithHalt p [] halt 
+
+
 
 -- Main for parsing and executing with lists.
 -- main =
@@ -168,14 +188,22 @@ executeProgram p f = f $ eval p []
 --               evalA r v
 --               print (Vec.read v 0)
 --               return ()
-              
-          
--- main = do
---   c <- getContents
---     case parse program "(stdin)" c of
---       Left e -> do putStrLn "Error parsing input:"
---                    print e
---       Right r -> do
---         si <- memsize r
-              --(print (executeProgram r getReturnValue0))
-  
+
+-- Versión con arreglos                     
+main :: IO ()
+main =
+    do c <- getContents
+       case parse program "(stdin)" c of
+            Left e -> do putStrLn "Error parsing input:"
+                         print e
+            Right r -> print (getIntegerReturnValue r)
+
+
+-- Versión sin arreglos.
+-- main :: IO ()
+-- main =
+--     do c <- getContents
+--        case parse program "(stdin)" c of
+--             Left e -> do putStrLn "Error parsing input:"
+--                          print e
+--             Right r -> print (executeProgram r getReturnValue0)
