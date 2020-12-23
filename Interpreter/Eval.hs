@@ -3,7 +3,6 @@
 import Language
 import Parser hiding (main)
 import Text.ParserCombinators.Parsec hiding (State)
-import Data.Maybe
 
 --A memory state using lists
 type StateL = [(Int, Integer)]
@@ -150,7 +149,6 @@ executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 -- Versión sin arreglos.
 main :: IO ()
 main =
-  --putStrLn "Hello World"
     do c <- getContents
        case parse program "(stdin)" c of
             Left e -> do putStrLn "Error parsing input:"
