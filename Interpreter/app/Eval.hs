@@ -1,6 +1,7 @@
 -- Evaluator for our while language expressions.
 -- Author: Victor Zamora
 import Language
+import Data.Maybe
 import Parser hiding (main)
 import Text.ParserCombinators.Parsec hiding (State)
 
