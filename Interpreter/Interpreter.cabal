@@ -42,7 +42,7 @@ executable Interpreter-exe
       Paths_Interpreter
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -O2 -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       Interpreter
     , base >=4.7 && <5
