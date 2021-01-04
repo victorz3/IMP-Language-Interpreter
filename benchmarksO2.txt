@@ -1,0 +1,47 @@
+Tiempo versión sin arreglos:
+100 direcciones:
+0.588, 0.578, 0.566, 0.568, 0.557, 0.557, 0.567, 0.550, 0.561, 0.541
+Promedio
+0.5633
+
+Tiempo versión con arreglos:
+100 direcciones:
+Promedio
+
+Sin arreglos:
+1000 direcciones:
+0.569, 0.571, 0.556, 0.567, 0.573, 0.591, 0.600, 0.574, 0.568, 0.578
+Promedio
+0.5747
+
+Con arreglos:
+1000 direcciones:
+Promedio
+
+Sin arreglos:
+10000 direcciones:
+0.690, 0.686, 0.753, 0.689, 0.723, 0.769, 0.745, 0.720, 0.690, 0.921
+Promedio
+0.7386
+
+Con arreglos:
+10000 direcciones:
+Promedio
+
+Sin arreglos:
+100000 direcciones:
+2.000, 2.061, 1.827, 1.903, 2.068, 2.035, 1.886, 1.990, 1.839, 1.924
+Promedio
+1.9533
+
+Con arreglo:
+100000 direcciones:
+
+Patricia
+100 direcciones:
+
+1000 direcciones:
+
+10000 direcciones:
+
+100000 direcciones:
