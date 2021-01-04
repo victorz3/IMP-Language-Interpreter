@@ -93,7 +93,7 @@ evalBoolA (And a1 a2) v = do
 -- Using constant array size for now, but eventually will have to allocate.
 getReturnValue0A :: Program -> ST s Integer
 getReturnValue0A p = do
-  v <- Vec.replicate 10000 0
+  v <- Vec.replicate 100000 0
   evalA p v
   Vec.read v 0
 
