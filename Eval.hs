@@ -2,7 +2,11 @@
 -- Author: Victor Zamora
 import Language
 import Parser hiding (main)
+import Data.Maybe
+import Math.NumberTheory.Logarithms
 import Text.ParserCombinators.Parsec hiding (State)
+import Numeric (showIntAtBase)
+import Data.Char (intToDigit)
 
 --A memory state using lists
 type StateL = [(Int, Integer)]
@@ -75,9 +79,6 @@ evalAritWH (Times a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                   in let p2 = (evalAritWH a2 s (snd p1))
                                      in ((fst p1) * (fst p2), (snd p2) -1)
 
-
-
-
 -- Evaluates a boolean expression
 evalBool :: BoolExp -> StateL -> Bool
 evalBool T _ = True
@@ -111,9 +112,34 @@ evalBoolWH (And b1 b2) s halt = let p1 = (evalBoolWH b1 s halt)
 
 
 --Gets the return value from the position x[i]
-getReturnValue :: Int -> StateL -> Integer
-getReturnValue i s = getValue s i 
+getReturnValue :: StateL -> String
+getReturnValue s = getStringFromTuple $ getTupleFromNat $ getNat $ getValue s 0 
 
+-- Returns a natural number with an integer as input.
+getNat :: Integer -> Integer
+getNat i = if i >= 0
+           then 2 * i
+           else (-2) * i - 1
+
+{- Returns the ith String in canonical order.
+   This function returns a tuple where the first element is
+   the numeric output and the second element is the number
+   of bits required to represent said number as a string -}
+getTupleFromNat :: Integer -> (Integer, Int)
+getTupleFromNat n = let l = integerLog2 n
+                     in let c = n - (2^l) + 2
+                        in (c, l)
+
+{-
+Transforms a tuple of Integer and Int into a String.
+If the tuple is (n, m), the string will b n in base 2
+using m digits.
+-}
+getStringFromTuple :: (Integer, Int) -> String
+getStringFromTuple (n, m) = let stringn = showIntAtBase 2 intToDigit n ""
+                            in replicate (m - (integerLog2 n) - 1) '0' ++
+                               stringn
+                           
 --Executes the program and returns a value.
 --This function receives a function that gets the return value from the state.
 executeProgram :: Program -> (StateL -> Integer) -> Integer
@@ -147,13 +173,13 @@ executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 
 
 -- Versión sin arreglos.
-main :: IO ()
-main =
-    do c <- getContents
-       case parse program "(stdin)" c of
-            Left e -> do putStrLn "Error parsing input:"
-                         print e
-            Right r -> print (executeProgram r (getReturnValue 0))
+-- main :: IO ()
+-- main =
+--     do c <- getContents
+--        case parse program "(stdin)" c of
+--             Left e -> do putStrLn "Error parsing input:"
+--                          print e
+--             Right r -> print (executeProgram r (getReturnValue 0))
 
 -- Versión sin y con detención en 5 pasos.
 -- main :: IO ()
