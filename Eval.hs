@@ -150,18 +150,6 @@ executeProgram p f = f $ eval p []
 executeProgramWH :: Program -> Int -> (StateL -> Integer) -> Integer
 executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 
--- Main for parsing and executing with lists.
--- main =
---   do c <- getContents
---      case parse program "(stdin)" c of
---             Left e -> do putStrLn "Error parsing input:"
---                          print e
---             Right r -> do
---               v <- Vec.replicate 2 0
---               evalA r v
---               print (Vec.read v 0)
---               return ()
-
 -- Versión con arreglos                     
 -- main :: IO ()
 -- main =
@@ -171,15 +159,19 @@ executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 --                          print e
 --             Right r -> print (getIntegerReturnValue r)
 
+-- Parses program without using the first line
+parsewoFirstLine :: Parser Program
+parsewoFirstLine = anyChar newline *> endBy program eol
 
 -- Versión sin arreglos.
--- main :: IO ()
--- main =
---     do c <- getContents
---        case parse program "(stdin)" c of
---             Left e -> do putStrLn "Error parsing input:"
---                          print e
---             Right r -> print (executeProgram r (getReturnValue 0))
+main :: IO ()
+main =
+    do c <- getContents
+       let l = head . lines c
+       case parse parsewoFirstLine "(stdin)" c of
+            Left e -> do putStrLn "Error parsing input:"
+                         print e
+            Right r -> print (executeProgram r (getReturnValue 0))
 
 -- Versión sin y con detención en 5 pasos.
 -- main :: IO ()
