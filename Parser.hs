@@ -169,15 +169,10 @@ program = try(concatParser)
           <|> try(whileParser)
           <|> try(ifParser)
           <?> "a valid program"
-          
--- For testing.
-main =
-    do c <- getContents
-       case parse program "(stdin)" c of
-            Left e -> do putStrLn "Error parsing input:"
-                         print e
-            Right r -> (print r)
 
+-- Parses program without using the first line
+parsewoFirstLine :: Parser Program
+parsewoFirstLine = manyTill anyChar newline *> program
           
           
           

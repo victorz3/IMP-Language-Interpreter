@@ -126,7 +126,8 @@ getNat i = if i >= 0
    the numeric output and the second element is the number
    of bits required to represent said number as a string -}
 getTupleFromNat :: Integer -> (Integer, Int)
-getTupleFromNat n = let l = integerLog2 n
+getTupleFromNat 0 = (0, 1)
+getTupleFromNat n = let l = integerLog2 (n+2)
                      in let c = n - (2^l) + 2
                         in (c, l)
 
@@ -136,13 +137,14 @@ If the tuple is (n, m), the string will b n in base 2
 using m digits.
 -}
 getStringFromTuple :: (Integer, Int) -> String
+getStringFromTuple (0, x) = replicate x '0'
 getStringFromTuple (n, m) = let stringn = showIntAtBase 2 intToDigit n ""
                             in replicate (m - (integerLog2 n) - 1) '0' ++
                                stringn
                            
 --Executes the program and returns a value.
 --This function receives a function that gets the return value from the state.
-executeProgram :: Program -> (StateL -> Integer) -> Integer
+executeProgram :: Program -> (StateL -> String) -> String
 executeProgram p f = f $ eval p []
 
 -- Executes the program with the option to halt if, after a number of steps,
@@ -159,19 +161,15 @@ executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 --                          print e
 --             Right r -> print (getIntegerReturnValue r)
 
--- Parses program without using the first line
-parsewoFirstLine :: Parser Program
-parsewoFirstLine = anyChar newline *> endBy program eol
-
 -- Versión sin arreglos.
 main :: IO ()
-main =
+main = --print (getTupleFromNat 1)
     do c <- getContents
-       let l = head . lines c
+       let l = head (lines c)
        case parse parsewoFirstLine "(stdin)" c of
             Left e -> do putStrLn "Error parsing input:"
                          print e
-            Right r -> print (executeProgram r (getReturnValue 0))
+            Right r -> print (executeProgram r (getReturnValue))
 
 -- Versión sin y con detención en 5 pasos.
 -- main :: IO ()
