@@ -4,7 +4,7 @@ import Language
 import Parser hiding (main)
 import Data.Maybe
 import Math.NumberTheory.Logarithms
-import Text.ParserCombinators.Parsec hiding (State)
+import Text.ParseLrCombinators.Parsec hiding (State)
 import Numeric (showIntAtBase)
 import Data.Char (intToDigit)
 
@@ -20,6 +20,34 @@ replace :: Int -> StateL -> Integer -> StateL
 replace n [] i = [(n, i)]
 replace n ((a, b):xs) i = if n == a then ((n, i):xs)
                           else ((a, b):(replace n xs i))
+
+-- Simplifies a boolean expression
+simplBoolExp :: BoolExp -> BoolExp
+simplBoolExp (Equals x y) = if x == y then T else (Equals x y)
+simplBoolExp (Lessthan x y) = if x == y then F else (Lessthan x y)
+simplBoolExp (Not b) = let b' = simplBoolExp b in
+                       | b' == T = F
+                       | b' == F = T
+                       | otherwise = (Not b')
+simplBoolExp (Or b1 b2) = let b1' = simplBoolExp b1
+                              b2' = simplBoolExp b2 in
+                            | b1' == T = T
+                            | b2' == T = T
+                            | b1' == F = b2'
+                            | b2' == F = b1'
+                            | otherwise (Or b1' b2')
+simplBoolExp (And b1 b2) = let b1' = simplBoolExp b1
+                               b2' = simplBoolExp b2 in
+                             | b1' == F = F
+                             | b2' == F = F
+                             | b1' == T = b2'
+                             | b2' == T = b1'
+                             | otherwise (And b1' b2')
+
+-- -- Does boolean simplification of a program.
+-- booleanSimpl :: Program -> Program
+-- booleanSimpl Skip = Skip
+-- booleanSimpl 
 
 --Defining a simple eval function
 eval :: Program -> StateL -> StateL

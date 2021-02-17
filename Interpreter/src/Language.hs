@@ -7,7 +7,9 @@ data Program = Skip
              | Assign Loc Arit
              | Concat Program Program
              | If BoolExp Program Program
-             | While BoolExp Program deriving (Show)
+             | While BoolExp Program
+             -- Special, non-halting program
+             | NoHalt deriving (Show, Eq)
 
 -- Arithmetic expression
 data Arit = In Integer

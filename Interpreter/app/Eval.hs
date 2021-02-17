@@ -3,6 +3,7 @@
 import Language
 import Parser hiding (main)
 import Data.Maybe
+import System.IO
 import Math.NumberTheory.Logarithms
 import Text.ParserCombinators.Parsec hiding (State)
 import Numeric (showIntAtBase)
@@ -31,7 +32,6 @@ simplBoolExp (Not b)
   | otherwise = (Not b')
   where
     b' = simplBoolExp b
-
 simplBoolExp (Or b1 b2)
   | b1' == T = T
   | b2' == T = T
@@ -41,7 +41,6 @@ simplBoolExp (Or b1 b2)
   where
     b1' = simplBoolExp b1
     b2' = simplBoolExp b2
-  
 simplBoolExp (And b1 b2)
   | b1' == F = F
   | b2' == F = F
@@ -51,8 +50,31 @@ simplBoolExp (And b1 b2)
   where
     b1' = simplBoolExp b1
     b2' = simplBoolExp b2
-
 simplBoolExp x = x
+
+{- Simplifies booleans in a program, attempting to detect programs that
+ - don't halt.
+ -} 
+simplBoolProgram :: Program -> Program
+simplBoolProgram (Concat p1 p2) = if p1' == NoHalt || p2' == NoHalt
+                                  then NoHalt
+                                  else (Concat p1' p2')
+  where p1' = simplBoolProgram p1
+        p2' = simplBoolProgram p2
+simplBoolProgram (If b p1 p2)
+  | b' == T = p1'
+  | b' == F = p2'
+  | otherwise = (If b' p1' p2')
+  where b' = simplBoolExp b
+        p1' = simplBoolProgram p1
+        p2' = simplBoolProgram p2
+simplBoolProgram (While b p)
+  | b' == T = NoHalt
+  | b' == F = Skip
+  | otherwise = (While b' p')
+  where b' = simplBoolExp b
+        p' = simplBoolProgram p
+simplBoolProgram x = x
   
 --Defining a simple eval function
 eval :: Program -> StateL -> StateL
@@ -186,6 +208,14 @@ executeProgramWH :: Program -> Int -> (StateL -> Integer) -> Integer
 executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 
 -- Versión sin arreglos.
+main :: IO ()
+main = do handle <- openFile "example.while" ReadMode
+          c <- hGetContents handle
+          case parse program "(stdin)" c of
+            Left e -> do putStrLn "Error parsing input:"
+                         print e
+            Right r -> print (simplBoolProgram r)  
+
 -- main :: IO ()
 -- main = do c <- getContents
 --           let l = head (lines c)

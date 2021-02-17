@@ -1,4 +1,6 @@
-4
-(x[0] := 29;
- (while false do
-   skip))
+(x[0] := 0;
+ (if true then
+    skip
+  else
+    skip))
+
