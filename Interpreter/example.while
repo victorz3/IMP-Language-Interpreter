@@ -1,4 +1,4 @@
-29290
+4
 (x[0] := 29;
  (while false do
    skip))

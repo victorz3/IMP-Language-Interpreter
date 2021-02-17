@@ -21,6 +21,39 @@ replace n [] i = [(n, i)]
 replace n ((a, b):xs) i = if n == a then ((n, i):xs)
                           else ((a, b):(replace n xs i))
 
+-- Simplifies a boolean expression
+simplBoolExp :: BoolExp -> BoolExp
+simplBoolExp (Equals x y) = if x == y then T else (Equals x y)
+simplBoolExp (Lessthan x y) = if x == y then F else (Lessthan x y)
+simplBoolExp (Not b)
+  | b' == T = F
+  | b' == F = T
+  | otherwise = (Not b')
+  where
+    b' = simplBoolExp b
+
+simplBoolExp (Or b1 b2)
+  | b1' == T = T
+  | b2' == T = T
+  | b1' == F = b2'
+  | b2' == F = b1'
+  | otherwise = (Or b1' b2')
+  where
+    b1' = simplBoolExp b1
+    b2' = simplBoolExp b2
+  
+simplBoolExp (And b1 b2)
+  | b1' == F = F
+  | b2' == F = F
+  | b1' == T = b2'
+  | b2' == T = b1'
+  | otherwise = (And b1' b2')
+  where
+    b1' = simplBoolExp b1
+    b2' = simplBoolExp b2
+
+simplBoolExp x = x
+  
 --Defining a simple eval function
 eval :: Program -> StateL -> StateL
 eval Skip s = s
@@ -152,24 +185,15 @@ executeProgram p f = f $ eval p []
 executeProgramWH :: Program -> Int -> (StateL -> Integer) -> Integer
 executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 
--- Versión con arreglos                     
+-- Versión sin arreglos.
 -- main :: IO ()
--- main =
---     do c <- getContents
---        case parse program "(stdin)" c of
+-- main = do c <- getContents
+--           let l = head (lines c)
+--           case parse parsewoFirstLine "(stdin)" c of
 --             Left e -> do putStrLn "Error parsing input:"
 --                          print e
---             Right r -> print (getIntegerReturnValue r)
-
--- Versión sin arreglos.
-main :: IO ()
-main = --print (getTupleFromNat 1)
-    do c <- getContents
-       let l = head (lines c)
-       case parse parsewoFirstLine "(stdin)" c of
-            Left e -> do putStrLn "Error parsing input:"
-                         print e
-            Right r -> print (executeProgram r (getReturnValue))
+--             Right r -> appendFile "output.txt" ("\n" ++ l ++ " - " ++ (executeProgram r (getReturnValue)))
+            
 
 -- Versión sin y con detención en 5 pasos.
 -- main :: IO ()

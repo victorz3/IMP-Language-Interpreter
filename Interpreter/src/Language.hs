@@ -14,7 +14,7 @@ data Arit = In Integer
           | Mem Loc
           | Plus Arit Arit
           | Minus Arit Arit
-          | Times Arit Arit deriving (Show)
+          | Times Arit Arit deriving (Show, Eq)
 
 -- Boolean Expression
 data BoolExp = T
@@ -23,8 +23,8 @@ data BoolExp = T
              | Lessthan Arit Arit
              | Not BoolExp
              | Or BoolExp BoolExp
-             | And BoolExp BoolExp deriving (Show)
+             | And BoolExp BoolExp deriving (Show, Eq)
 
 --Memory location
-data Loc = Loc Int deriving (Show)
+data Loc = Loc Int deriving (Show, Eq)
  
