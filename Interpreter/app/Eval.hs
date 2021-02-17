@@ -2,6 +2,7 @@
 -- Author: Victor Zamora
 import Language
 import Parser hiding (main)
+import Util
 import Data.Maybe
 import System.IO
 import Math.NumberTheory.Logarithms
@@ -78,6 +79,7 @@ simplBoolProgram x = x
   
 --Defining a simple eval function
 eval :: Program -> StateL -> StateL
+eval NoHalt s = replace 0 s (-1) 
 eval Skip s = s
 eval (Assign (Loc x) a) s = replace x s (evalArit a s)
 eval (Concat p1 p2) s = let sNew = (eval p1 s)
@@ -91,7 +93,7 @@ eval (While b p) s = if (evalBool b s) then let sNew = (eval p s)
 --Evaluation function with optional halting parameter.
 evalWH :: Program -> StateL -> Int -> (StateL, Int)
 evalWH p s halt = if (halt <= 0)
-                      then (s, 0)
+                      then (replace 0 s (-1), 0)
                       else (evalWHAux p s halt)
 
 --Auxiliary function that evaluates one step, then checks halting condition again.
@@ -117,7 +119,7 @@ evalArit :: Arit -> StateL -> Integer
 evalArit (In n) _ = n
 evalArit (Mem (Loc x)) s = (getValue s x)   
 evalArit (Plus a1 a2) s = (evalArit a1 s) + (evalArit a2 s)
-evalArit (Minus a1 a2) s = (evalArit a1 s) - (evalArit a2 s)
+evalArit (Minus a1 a2) s = natSub (evalArit a1 s) (evalArit a2 s)
 evalArit (Times a1 a2) s = (evalArit a1 s) * (evalArit a2 s)
 
 -- Evaluates an arithmetic expression with a halting parameter.
@@ -129,7 +131,7 @@ evalAritWH (Plus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                     in ((fst p1) + (fst p2), (snd p2) -1)
 evalAritWH (Minus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                   in let p2 = (evalAritWH a2 s (snd p1))
-                                     in ((fst p1) - (fst p2), (snd p2) -1)
+                                     in (natSub (fst p1) (fst p2), (snd p2) -1)
 evalAritWH (Times a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                   in let p2 = (evalAritWH a2 s (snd p1))
                                      in ((fst p1) * (fst p2), (snd p2) -1)
@@ -168,13 +170,7 @@ evalBoolWH (And b1 b2) s halt = let p1 = (evalBoolWH b1 s halt)
 
 --Gets the return value from the position x[i]
 getReturnValue :: StateL -> String
-getReturnValue s = getStringFromTuple $ getTupleFromNat $ getNat $ getValue s 0 
-
--- Returns a natural number with an integer as input.
-getNat :: Integer -> Integer
-getNat i = if i >= 0
-           then 2 * i
-           else (-2) * i - 1
+getReturnValue s = getStringFromTuple $ getTupleFromNat $ getValue s 0 
 
 {- Returns the ith String in canonical order.
    This function returns a tuple where the first element is
@@ -182,9 +178,12 @@ getNat i = if i >= 0
    of bits required to represent said number as a string -}
 getTupleFromNat :: Integer -> (Integer, Int)
 getTupleFromNat 0 = (0, 1)
-getTupleFromNat n = let l = integerLog2 (n+2)
-                     in let c = n - (2^l) + 2
-                        in (c, l)
+getTupleFromNat n = if n > 0
+                    then let l = integerLog2 (n+2)
+                         in let c = n - (2^l) + 2
+                            in (c, l)
+                    -- Si el número es negativo, tenemos un error.
+                    else (-1, 0)
 
 {-
 Transforms a tuple of Integer and Int into a String.
@@ -192,11 +191,12 @@ If the tuple is (n, m), the string will b n in base 2
 using m digits.
 -}
 getStringFromTuple :: (Integer, Int) -> String
-getStringFromTuple (0, x) = replicate x '0'
-getStringFromTuple (n, m) = let stringn = showIntAtBase 2 intToDigit n ""
-                            in replicate (m - (integerLog2 n) - 1) '0' ++
-                               stringn
-                           
+getStringFromTuple (n, m)
+  | m <= 0 = "err"
+  | n == 0 = replicate m '0'
+  | otherwise = replicate (m - (integerLog2 n) - 1) '0' ++ stringn
+  where stringn = showIntAtBase 2 intToDigit n ""
+                                                      
 --Executes the program and returns a value.
 --This function receives a function that gets the return value from the state.
 executeProgram :: Program -> (StateL -> String) -> String
@@ -214,7 +214,7 @@ main = do handle <- openFile "example.while" ReadMode
           case parse program "(stdin)" c of
             Left e -> do putStrLn "Error parsing input:"
                          print e
-            Right r -> print (simplBoolProgram r)  
+            Right r -> print (natSub (101020) (101021))  
 
 -- main :: IO ()
 -- main = do c <- getContents

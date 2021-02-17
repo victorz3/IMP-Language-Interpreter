@@ -27,6 +27,7 @@ library
   exposed-modules:
       Language
       Parser
+      Util
   other-modules:
       Paths_Interpreter
   hs-source-dirs:
