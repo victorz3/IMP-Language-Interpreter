@@ -6,6 +6,8 @@ import System.IO
 import Control.Monad
 import qualified Data.ByteString.Lazy as LB
 import Data.Digest.Pure.MD5
+import System.Random
+import Data.Sort
 import Util
 
 -- Name of file with the hash code.
@@ -35,4 +37,6 @@ main = do
   handle2 <- openFile programs ReadMode
   prog <- hGetContents handle2
   let programs = lines prog
-  print $ getElems [1] ["hola", "juan", "paco", "pedro", "de", "la", "mar", "es", "mi", "nombre", "si", "y", "cuando", "yo", "noseque"]
+  print programs
+  let sample = randomSample 4 4 ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+  print sample

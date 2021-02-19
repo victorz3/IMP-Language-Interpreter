@@ -35,10 +35,9 @@ getElemsAux n (x:l1) (y:l2) = if (x-n == 0)
                               else getElemsAux (n+1) (x:l1) l2
 
 -- Random sample of a list
--- randomSample :: Int -> [a] -> IO [a]
--- randomSample 0 _ = do return []
--- randomSample _ [] = do return []
--- randomSample n l = do
---   gen <- getStdGen
---   randomL <- randomRs (0, (length l) - 1) gen
-  
+randomSample :: Int -> Int -> [a] -> [a]
+randomSample _ 0 _ = []
+randomSample _ _ [] = []
+randomSample seed n l = let gen = mkStdGen seed
+                            indices = randomRs (0, length(l) -1) gen
+                        in getElems (take n indices) l
