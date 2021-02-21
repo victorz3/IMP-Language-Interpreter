@@ -34,7 +34,11 @@ getElemsAux n (x:l1) (y:l2) = if (x-n == 0)
                               then y:(getElemsAux (n+1) l1 l2)
                               else getElemsAux (n+1) (x:l1) l2
 
--- Random sample of a list
+{- Random sample of a list.
+ - First argument is the seed to be used by pseudo-random number generator.
+ - Second argument the number of elements to get. Depending on the values returned by
+ - the RNG, the sample may be smaller than the number of specified elements.
+ - Third argument is the list to get the random sample from. -}
 randomSample :: Int -> Int -> [a] -> [a]
 randomSample _ 0 _ = []
 randomSample _ _ [] = []

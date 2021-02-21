@@ -173,7 +173,16 @@ program = try(concatParser)
 -- Parses program without using the first line
 parsewoFirstLine :: Parser Program
 parsewoFirstLine = manyTill anyChar newline *> program
-          
+
+{- Parses a numbered program. The first line of the String is the number and the
+ - rest is the program. -}
+numberedProgram :: Parser (Int, Program)
+numberedProgram = do
+  number <- many1 digit
+  let i = read number
+  spaces
+  p <- program
+  return (i, p)
           
           
  

@@ -211,10 +211,10 @@ executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 main :: IO ()
 main = do handle <- openFile "example.while" ReadMode
           c <- hGetContents handle
-          case parse program "(stdin)" c of
+          case parse numberedProgram "(stdin)" c of
             Left e -> do putStrLn "Error parsing input:"
                          print e
-            Right r -> print (natSub (101020) (101021))  
+            Right r -> print ((show $ fst r) ++ "\n" ++ (show $ snd r))  
 
 -- main :: IO ()
 -- main = do c <- getContents

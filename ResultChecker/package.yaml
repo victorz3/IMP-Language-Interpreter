@@ -25,6 +25,7 @@ dependencies:
 - pureMD5
 - random
 - sort
+- time
 
 library:
   source-dirs: src
