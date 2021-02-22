@@ -183,6 +183,19 @@ numberedProgram = do
   spaces
   p <- program
   return (i, p)
-          
+
+{- Parses a numbered program and its halting parameter. The first line of the String
+ - is the program's number. The second line indicates number of steps to run. Third
+ - line and beyond is the program. -}
+numberedProgramWithHalt :: Parser (Int, Int, Program)
+numberedProgramWithHalt = do
+  n <- many1 digit
+  let number = read n
+  spaces
+  h <- many1 digit
+  let halt = read h
+  spaces
+  p <- program
+  return (number, halt, p)
           
  

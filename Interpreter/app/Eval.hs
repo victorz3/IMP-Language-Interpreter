@@ -2,7 +2,7 @@
 -- Author: Victor Zamora
 import Language
 import Parser hiding (main)
-import Util
+import qualified Util
 import Data.Maybe
 import System.IO
 import Math.NumberTheory.Logarithms
@@ -119,7 +119,7 @@ evalArit :: Arit -> StateL -> Integer
 evalArit (In n) _ = n
 evalArit (Mem (Loc x)) s = (getValue s x)   
 evalArit (Plus a1 a2) s = (evalArit a1 s) + (evalArit a2 s)
-evalArit (Minus a1 a2) s = natSub (evalArit a1 s) (evalArit a2 s)
+evalArit (Minus a1 a2) s = Util.natSub (evalArit a1 s) (evalArit a2 s)
 evalArit (Times a1 a2) s = (evalArit a1 s) * (evalArit a2 s)
 
 -- Evaluates an arithmetic expression with a halting parameter.
@@ -131,7 +131,7 @@ evalAritWH (Plus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                     in ((fst p1) + (fst p2), (snd p2) -1)
 evalAritWH (Minus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                   in let p2 = (evalAritWH a2 s (snd p1))
-                                     in (natSub (fst p1) (fst p2), (snd p2) -1)
+                                     in (Util.natSub (fst p1) (fst p2), (snd p2) -1)
 evalAritWH (Times a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                   in let p2 = (evalAritWH a2 s (snd p1))
                                      in ((fst p1) * (fst p2), (snd p2) -1)
@@ -211,10 +211,13 @@ executeProgramWH p halt f = f $ fst $ evalWH p [] halt
 main :: IO ()
 main = do handle <- openFile "example.while" ReadMode
           c <- hGetContents handle
-          case parse numberedProgram "(stdin)" c of
+          case parse numberedProgramWithHalt "(stdin)" c of
             Left e -> do putStrLn "Error parsing input:"
                          print e
-            Right r -> print ((show $ fst r) ++ "\n" ++ (show $ snd r))  
+            Right r -> do
+              print $ "Program number: " ++ (show $ Util.fst r)
+              print $ "Halting parameter: " ++ (show $ Util.snd r)
+              print $ "Program: " ++ (show $ Util.thrd r)
 
 -- main :: IO ()
 -- main = do c <- getContents

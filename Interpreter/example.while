@@ -1,4 +1,5 @@
 10
+1000
 (x[0] := 0;
  (if true then
     skip
