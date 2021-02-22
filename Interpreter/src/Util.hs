@@ -29,3 +29,8 @@ snd (_, x, _ ) = x
 -- Returns the third element in a 3-tuple.
 thrd :: (a, b, c) -> c
 thrd (_, _, x) = x
+
+-- Returns the size of a String in bytes.
+getSizeInBytes :: String -> Int
+getSizeInBytes s = 8 * (length s)
+
