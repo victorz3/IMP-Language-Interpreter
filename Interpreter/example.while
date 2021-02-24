@@ -1,6 +1,6 @@
 10
-1000
-(x[0] := 0;
+3
+(x[0] := 10;
  (if true then
     skip
   else
