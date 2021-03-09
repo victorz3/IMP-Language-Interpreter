@@ -182,7 +182,7 @@ getStringFromTuple (n, m)
  - default to the value established by maxSteps.
  - Third parameter is a function that returns the program's output. -}
 executeProgram :: Program -> Int -> (StateL -> String) -> String
-executeProgram p halt f = let halt' = if halt < 0
+executeProgram p halt f = let halt' = if halt <= 0
                                       then maxSteps
                                       else halt
                           in f $ fst $ evalWH p [] halt'
@@ -193,13 +193,28 @@ executeListOfPrograms lop outputFunc = map
                                         outputFunc) lop
 
 
+testerFunction :: String  -> IO ()
+testerFunction programNo =
+  do
+    programHandle <- openFile (programFilesLoc ++ programNo ++ ".while") ReadMode
+    contents <- hGetContents programHandle
+    case parse numberedProgramWithHalt "(stdin)" contents of
+      Left e -> do putStrLn "Error parsing input:"
+                   print e
+      Right r -> do
+        let res = executeProgram (Util.thrd r) (Util.snd r) getReturnValue
+        print res
+
 -- Versión sin arreglos.
 main :: IO ()
 main = do hanP <- openFile programsFile ReadMode
           c <- hGetContents hanP
           let programs = lines c
           print programs
-          -- case parse numberedProgramWithHalt "(stdin)" c of
+          test <- mapM testerFunction programs
+          print "Es el final"
+
+                   -- case parse numberedProgramWithHalt "(stdin)" c of
           --   Left e -> do putStrLn "Error parsing input:"
           --                print e
           --   Right r -> do
