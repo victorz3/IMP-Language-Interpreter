@@ -14,10 +14,10 @@ import Data.Char (intToDigit)
 maxSteps = 10000
 
 -- File containing programs to run.
-programs = "programs.txt"
+programsFile = "programs.txt"
 
 -- Folder containing program files.
-program_files_loc = "programs/"
+programFilesLoc = "programs/"
 
 --A memory state using lists
 type StateL = [(Int, Integer)]
@@ -187,9 +187,15 @@ executeProgram p halt f = let halt' = if halt < 0
                                       else halt
                           in f $ fst $ evalWH p [] halt'
 
+executeListOfPrograms :: [(Program, Int)] -> (StateL -> String) -> [String]
+executeListOfPrograms lop outputFunc = map
+                                       (\t -> executeProgram (fst t) (snd t)
+                                        outputFunc) lop
+
+
 -- Versión sin arreglos.
 main :: IO ()
-main = do hanP <- openFile programs ReadMode
+main = do hanP <- openFile programsFile ReadMode
           c <- hGetContents hanP
           let programs = lines c
           print programs
