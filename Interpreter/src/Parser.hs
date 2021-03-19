@@ -5,24 +5,16 @@ module Parser where
 import Text.ParserCombinators.Parsec
 import Language
 
--- Parses a negative integer.
-negative :: Parser Integer
-negative = do
-  sign <- char '-'
-  number <- many1 digit
-  return (read (sign:number))
-
--- Parses digits into an integer.
+-- Parses a natural number.
 digitsToInteger :: Parser Integer
 digitsToInteger = do
   num <- many1 digit
   return (read num)
 
---Parses any integer.
+-- Parser for natural integers.
 integer :: Parser Integer
-integer = negative
-          <|> digitsToInteger
-          <?> "an integer"
+integer = digitsToInteger
+          <?> "a natural integer"
   
 -- References
 memory :: Parser Loc

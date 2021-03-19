@@ -19,6 +19,9 @@ programsFile = "programs.txt"
 -- Folder containing program files.
 programFilesLoc = "programs/"
 
+-- File to write program outputs.
+outputs = "outputs.txt"
+
 --A memory state using lists
 type StateL = [(Int, Integer)]
 
@@ -62,8 +65,8 @@ simplBoolExp (And b1 b2)
     b2' = simplBoolExp b2
 simplBoolExp x = x
 
-{- Simplifies booleans in a program, attempting to detect programs that
- - don't halt.
+{- Simplifies booleans in a program, attempting to detect programs
+ - that don't halt.
  -} 
 simplBoolProgram :: Program -> Program
 simplBoolProgram (Concat p1 p2) = if p1' == NoHalt || p2' == NoHalt
@@ -92,11 +95,13 @@ evalWH p s halt = if (halt <= 0)
                       then (replace 0 s (-1), 0)
                       else (evalWHAux p s halt)
 
---Auxiliary function that evaluates one step, then checks halting condition again.
+{- Auxiliary function that evaluates one step, then checks halting
+ - condition again. -}
 evalWHAux :: Program -> StateL -> Int -> (StateL, Int)
 evalWHAux Skip s halt = (s, halt-1)
 evalWHAux (Assign (Loc x) a) s halt = let p = (evalAritWH a s halt)
-                                            in (replace x s (fst p), (snd p) -1)
+                                      in (replace x s (fst p),
+                                          (snd p) -1)
 evalWHAux (Concat p1 p2) s halt = let p = (evalWH p1 s halt)
                                         in (evalWH p2 (fst p) (snd p))
 evalWHAux (If b p1 p2) s halt = let p = (evalBoolWH b s halt)
@@ -105,8 +110,11 @@ evalWHAux (If b p1 p2) s halt = let p = (evalBoolWH b s halt)
                                    else (evalWH p2 s ((snd p) - 1))
 evalWHAux (While b p) s halt = let p1 = (evalBoolWH b s halt)
                                in if (fst p1)
-                                  then let p2 = (evalWH p s ((snd p1) - 1))
-                                       in (evalWH (While b p) (fst p2) (snd p2))
+                                  then
+                                    let p2 =
+                                          (evalWH p s ((snd p1) - 1))
+                                    in (evalWH (While b p) (fst p2)
+                                        (snd p2))
                                   else (s, (snd p1) - 1)
 
  
@@ -116,7 +124,8 @@ evalAritWH (In n) _ halt = (n, halt)
 evalAritWH (Mem (Loc x)) s halt = ((getValue s x), halt-1)   
 evalAritWH (Plus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                  in let p2 = (evalAritWH a2 s (snd p1))
-                                    in ((fst p1) + (fst p2), (snd p2) -1)
+                                    in ((fst p1) + (fst p2),
+                                        (snd p2) -1)
 evalAritWH (Minus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
                                   in let p2 = (evalAritWH a2 s (snd p1))
                                      in (Util.natSub (fst p1) (fst p2), (snd p2) -1)
@@ -193,25 +202,27 @@ executeListOfPrograms lop outputFunc = map
                                         outputFunc) lop
 
 
-testerFunction :: String  -> IO ()
-testerFunction programNo =
+
+openAndExecuteProgram :: String -> IO ()
+openAndExecuteProgram programName =
   do
-    programHandle <- openFile (programFilesLoc ++ programNo ++ ".while") ReadMode
+    programHandle <- openFile
+                     (programFilesLoc ++ programName ++ ".while")
+                     ReadMode
     contents <- hGetContents programHandle
     case parse numberedProgramWithHalt "(stdin)" contents of
-      Left e -> do putStrLn "Error parsing input:"
-                   print e
+      Left e -> error "Error parsing input: " -- ++ (show e)
       Right r -> do
-        let res = executeProgram (Util.thrd r) (Util.snd r) getReturnValue
-        print res
+        appendFile outputs $ (executeProgram (Util.thrd r) (Util.snd r) getReturnValue) ++ "\n"
+        
 
 -- Versión sin arreglos.
 main :: IO ()
 main = do hanP <- openFile programsFile ReadMode
           c <- hGetContents hanP
           let programs = lines c
-          print programs
-          test <- mapM testerFunction programs
+          --outputHandle <- openFile outputs AppendMode
+          test <- mapM openAndExecuteProgram programs
           print "Es el final"
 
                    -- case parse numberedProgramWithHalt "(stdin)" c of
