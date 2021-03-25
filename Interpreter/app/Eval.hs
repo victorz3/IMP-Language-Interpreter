@@ -172,11 +172,10 @@ getTupleFromNat n = if n > 0
                     -- Si el número es negativo, tenemos un error.
                     else (-1, 0)
 
-{-
-Transforms a tuple of Integer and Int into a String.
-If the tuple is (n, m), the string will b n in base 2
-using m digits.
--}
+{- Transforms a tuple of Integer and Int into a String.
+ - If the tuple is (n, m), the string will b n in base 2
+ - using m digits.
+ -}
 getStringFromTuple :: (Integer, Int) -> String
 getStringFromTuple (n, m)
   | m <= 0 = "err"
