@@ -1,5 +1,6 @@
--- Evaluator for our while language expressions.
--- Author: Victor Zamora
+{- Evaluator for our while language expressions.
+ - Author: Victor Zamora -}
+
 import Language
 import Parser hiding (main)
 import qualified Util
@@ -9,6 +10,7 @@ import Math.NumberTheory.Logarithms
 import Text.ParserCombinators.Parsec hiding (State)
 import Numeric (showIntAtBase)
 import Data.Char (intToDigit)
+
 
 -- Maximum number of steps to execute for each program.
 maxSteps = 10000
@@ -195,24 +197,29 @@ executeProgram p halt f = let halt' = if halt <= 0
                                       else halt
                           in f $ fst $ evalWH p [] halt'
 
-executeListOfPrograms :: [(Program, Int)] -> (StateL -> String) -> [String]
-executeListOfPrograms lop outputFunc = map
-                                       (\t -> executeProgram (fst t) (snd t)
-                                        outputFunc) lop
+execListPrograms :: [(Program, Int)] -> (StateL -> String) -> [String]
+execListPrograms lop outputF = map
+                               (\t -> executeProgram (fst t) (snd t)
+                                 outputF) lop
 
-
-
+{- Opens and executes a program file with the following format:
+ - 1st line is an integer stating the program number.
+ - 2nd line is an integer stating maximum number of steps to execute.
+ - 3rd line and beyond is the program itself, according to the IMP
+ - grammar. -}
 openAndExecuteProgram :: String -> IO ()
-openAndExecuteProgram programName =
-  do
-    programHandle <- openFile
-                     (programFilesLoc ++ programName ++ ".while")
-                     ReadMode
-    contents <- hGetContents programHandle
-    case parse numberedProgramWithHalt "(stdin)" contents of
-      Left e -> error "Error parsing input: " -- ++ (show e)
+openAndExecuteProgram programName = do
+  programHandle <- openFile
+                   (programFilesLoc ++ programName ++ ".while")
+                   ReadMode
+  contents <- hGetContents programHandle
+  case parse numberedProgramWithHalt "(stdin)" contents of
+      Left e -> error ("Error parsing input: " ++ (show e))
       Right r -> do
-        appendFile outputs $ (executeProgram (Util.thrd r) (Util.snd r) getReturnValue) ++ "\n"
+        let program = Util.thrd r
+        appendFile outputs $ (show (Util.fst r)) ++ " " ++
+          (executeProgram program (Util.snd r) getReturnValue)
+          ++ " " ++ (show (lenP program)) ++ "\n"
         
 
 -- Versión sin arreglos.
