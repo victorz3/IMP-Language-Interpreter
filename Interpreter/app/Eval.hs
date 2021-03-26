@@ -24,6 +24,9 @@ programFilesLoc = "programs/"
 -- File to write program outputs.
 outputs = "outputs.txt"
 
+-- File extension for our programs.
+extension = ".while"
+
 --A memory state using lists
 type StateL = [(Int, Integer)]
 
@@ -210,7 +213,7 @@ execListPrograms lop outputF = map
 openAndExecuteProgram :: String -> IO ()
 openAndExecuteProgram programName = do
   programHandle <- openFile
-                   (programFilesLoc ++ programName ++ ".while")
+                   (programFilesLoc ++ programName ++ extension)
                    ReadMode
   contents <- hGetContents programHandle
   case parse numberedProgramWithHalt "(stdin)" contents of
