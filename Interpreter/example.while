@@ -1,8 +1,0 @@
-10
-3
-(x[0] := 10;
- (if true then
-    skip
-  else
-    skip))
-
