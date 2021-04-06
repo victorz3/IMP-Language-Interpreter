@@ -53,18 +53,23 @@ getProgramResult p = do
   let l = lines contents
   return $ findResult l p
 
-{- Checks the result of a program.
- - First parameter is the program.
- - Second parameter is the expected result.
- - This function returns true if the execution of the program
- - returns the expected result and false otherwise. -}
-checkProgramResult :: String -> String -> Bool
-checkProgramResult p r = r == r
+{- | 'checkProgramResult' checks whether the result of a program matchs the one saved in the outputs file.
+     First parameter is the program.
+     Second parameter is the expected result.
+     This function returns 'true' if the execution of the program returns the expected result and 'false'
+     otherwise.
+-}
+checkProgramResult :: String -> String -> IO Bool
+checkProgramResult p r = do
+  result <- getProgramResult p
+  return (result == r)
 
 main :: IO ()
 main = do
   r <- getProgramResult "3"
   print r
+  iguales <- (checkProgramResult "3" r)
+  print iguales
   -- -- First, get value of hash. This step might not be necessary
   -- -- depending on how hash is received.
   -- handle1 <- openFile hashFile ReadMode

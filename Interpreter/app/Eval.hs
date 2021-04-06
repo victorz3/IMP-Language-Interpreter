@@ -2,6 +2,7 @@
  - Author: Victor Zamora -}
 
 import Language
+import qualified ProgramHandler
 import Parser hiding (main)
 import qualified Util
 import Data.Maybe
@@ -227,17 +228,19 @@ openAndExecuteProgram programName = do
 
 -- Versión sin arreglos.
 main :: IO ()
-main = do hanP <- openFile programsFile ReadMode
-          c <- hGetContents hanP
-          let programs = lines c
-          --outputHandle <- openFile outputs AppendMode
-          test <- mapM openAndExecuteProgram programs
-          print "Es el final"
-
+main = do p <- ProgramHandler.openProgram "0"
+          print p
+  
                    -- case parse numberedProgramWithHalt "(stdin)" c of
           --   Left e -> do putStrLn "Error parsing input:"
           --                print e
           --   Right r -> do
           --     let res = executeProgram (Util.thrd r) (Util.snd r) getReturnValue
-              
+       -- do hanP <- openFile programsFile ReadMode
+       --    c <- hGetContents hanP
+       --    let programs = lines c
+       --    --outputHandle <- openFile outputs AppendMode
+       --    test <- mapM openAndExecuteProgram programs
+       --    print "Es el final"
+       
               

@@ -45,3 +45,19 @@ randomSample _ _ [] = []
 randomSample seed n l = let gen = mkStdGen seed
                             indices = randomRs (0, length(l) -1) gen
                         in getElems (take n indices) l
+
+-- First element of a 3-tuple
+fst :: (a, b, c) -> a
+fst (x, _, _) = x
+
+-- Second element of a 3-tuple
+snd :: (a, b, c) -> b
+snd (_, x, _ ) = x
+
+-- Returns the third element in a 3-tuple.
+thrd :: (a, b, c) -> c
+thrd (_, _, x) = x
+
+-- Returns the size of a String in bytes.
+getSizeInBytes :: String -> Int
+getSizeInBytes s = 8 * (length s)
