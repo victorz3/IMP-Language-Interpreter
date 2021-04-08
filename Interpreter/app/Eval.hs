@@ -213,34 +213,42 @@ execListPrograms lop outputF = map
  - grammar. -}
 openAndExecuteProgram :: String -> IO ()
 openAndExecuteProgram programName = do
-  programHandle <- openFile
-                   (programFilesLoc ++ programName ++ extension)
-                   ReadMode
-  contents <- hGetContents programHandle
+  result <- openGetProgramResult programName
+  appendFile outputs $ result
+
+{- | 'openGetProgramResult' opens a program, executes it, and returns its
+     resulting 'String' wrapped in the 'IO' monad.
+     The resulting 'String' is of the form:
+     program# result len(program)
+-}
+openGetProgramResult :: String -> IO String
+openGetProgramResult p = do
+  contents <- ProgramHandler.openProgram p
   case parse numberedProgramWithHalt "(stdin)" contents of
-      Left e -> error ("Error parsing input: " ++ (show e))
-      Right r -> do
-        let program = Util.thrd r
-        appendFile outputs $ (show (Util.fst r)) ++ " " ++
-          (executeProgram program (Util.snd r) getReturnValue)
-          ++ " " ++ (show (lenP program)) ++ "\n"
-        
+    Left e -> error ("Error parsing input: " ++ (show e))
+    Right r -> do
+      let program = Util.thrd r
+      return ((show (Util.fst r)) ++ " " ++
+               (executeProgram program (Util.snd r) getReturnValue) ++
+               " " ++ (show (lenP program)) ++ "\n")
+
 
 -- Versión sin arreglos.
 main :: IO ()
-main = do p <- ProgramHandler.openProgram "0"
-          print p
-  
-                   -- case parse numberedProgramWithHalt "(stdin)" c of
+main = do hanP <- openFile programsFile ReadMode
+          c <- hGetContents hanP
+          let programs = lines c 
+          --outputHandle <- openFile outputs AppendMode
+          test <- mapM openAndExecuteProgram programs
+          print test
+          
+
+
+
+  -- case parse numberedProgramWithHalt "(stdin)" c of
           --   Left e -> do putStrLn "Error parsing input:"
           --                print e
           --   Right r -> do
           --     let res = executeProgram (Util.thrd r) (Util.snd r) getReturnValue
-       -- do hanP <- openFile programsFile ReadMode
-       --    c <- hGetContents hanP
-       --    let programs = lines c
-       --    --outputHandle <- openFile outputs AppendMode
-       --    test <- mapM openAndExecuteProgram programs
-       --    print "Es el final"
        
               
