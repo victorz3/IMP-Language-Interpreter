@@ -21,6 +21,6 @@ extension = ".while"
 openProgram :: String -> IO String
 openProgram p = do
   programHandle <- openFile
-                   (programFilesLoc ++ p ++ extension) ReadMode
+                   (folder ++ p ++ extension) ReadMode
   contents <- hGetContents programHandle
   return contents

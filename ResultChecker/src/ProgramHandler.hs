@@ -24,3 +24,10 @@ openProgram p = do
                    (folder ++ p ++ extension) ReadMode
   contents <- hGetContents programHandle
   return contents
+
+{- | 'getOutput' gets the output out of a line of the form:
+     program# program_output len(program)
+-}
+getOutput :: String -> String
+getOutput line = let w = words line in
+                   head $ tail $ w

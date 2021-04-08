@@ -25,6 +25,9 @@ source-repository head
 
 library
   exposed-modules:
+      Eval
+      Language
+      Parser
       ProgramHandler
       Util
   other-modules:
@@ -34,6 +37,8 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , integer-logarithms
+    , parsec
     , pureMD5
     , random
     , sort
@@ -51,6 +56,8 @@ executable ResultChecker-exe
       ResultChecker
     , base >=4.7 && <5
     , bytestring
+    , integer-logarithms
+    , parsec
     , pureMD5
     , random
     , sort
@@ -69,6 +76,8 @@ test-suite ResultChecker-test
       ResultChecker
     , base >=4.7 && <5
     , bytestring
+    , integer-logarithms
+    , parsec
     , pureMD5
     , random
     , sort

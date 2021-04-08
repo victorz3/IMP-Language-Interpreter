@@ -1,5 +1,6 @@
 {- Evaluator for our while language expressions.
  - Author: Victor Zamora -}
+module Eval where
 
 import Language
 import qualified ProgramHandler
@@ -239,8 +240,9 @@ main = do hanP <- openFile programsFile ReadMode
           c <- hGetContents hanP
           let programs = lines c 
           --outputHandle <- openFile outputs AppendMode
-          l <- mapM openAndExecuteProgram programs
-          return ()
+          test <- mapM openAndExecuteProgram programs
+          print test
+          
 
 
 
