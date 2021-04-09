@@ -1,22 +1,25 @@
---Parser for while programs
---Author: Victor Zamora
+{- |
+Module:      Parser 
+Description: This library is for parsing programs in our language (IMP).
+Mantainer:   agua@ciencias.unam.mx
+-}
 module Parser where
 
-import Text.ParserCombinators.Parsec
 import Language
+import Text.ParserCombinators.Parsec
 
--- Parses a natural number.
+-- | 'digitsToInteger' parses a String of digits into an integer.
 digitsToInteger :: Parser Integer
 digitsToInteger = do
   num <- many1 digit
   return (read num)
 
--- Parser for natural integers.
+-- | 'integer' parses an integer.
 integer :: Parser Integer
 integer = digitsToInteger
           <?> "a natural integer"
   
--- References
+-- | 'memory' parses memory locations in the IMP syntax.
 memory :: Parser Loc
 memory = 
   do char 'x'
@@ -24,11 +27,7 @@ memory =
      loc <- many1 digit
      char ']'
      return (Loc (read loc :: Int))
-
---Converts location to arithmetic expression
-locToArit :: Loc -> Arit
-locToArit x = Mem x
-
+     
 --Converts integer to arithmetic expression
 intToArit :: Integer -> Arit
 intToArit i = In i
@@ -37,7 +36,7 @@ intToArit i = In i
 --Arithmetic expressions
 arith :: Parser Arit
 arith = aOp
-        <|> locToArit <$> memory
+        <|> Language.locToArit <$> memory
         <|> intToArit <$> integer
         <?> "an arithmetic expression"
 
@@ -153,7 +152,7 @@ ifParser = do
   char ')'
   return (If b p1 p2)
   
---Parses a program
+-- Parses a program
 program :: Parser Program
 program = try(concatParser)
           <|> Skip <$ string "skip"
@@ -176,11 +175,11 @@ numberedProgram = do
   p <- program
   return (i, p)
 
-{- Parses a numbered program and its halting parameter. The first line of the String
+{- | 'numberedProgramHalt' parses a numbered program and its halting parameter. The first line of the String
  - is the program's number. The second line indicates number of steps to run. Third
  - line and beyond is the program. -}
-numberedProgramWithHalt :: Parser (Int, Int, Program)
-numberedProgramWithHalt = do
+numberedProgramHalt :: Parser (Int, Int, Program)
+numberedProgramHalt = do
   n <- many1 digit
   let number = read n
   spaces

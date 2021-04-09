@@ -79,3 +79,7 @@ lenInt :: Integral a => a -> Int
 lenInt 0 = 1
 lenInt 1 = 1
 lenInt n = 1 + (lenInt (div n 2))
+
+-- | 'locToArit' casts a 'Loc' into an 'Arit'.
+locToArit :: Loc -> Arit
+locToArit x = Mem x
