@@ -28,7 +28,7 @@ memory =
      char ']'
      return (Loc (read loc :: Int))
 
---Arithmetic expressions
+-- | 'arith' parses an arithmetic expression.
 arith :: Parser Arit
 arith = aOp
         <|> locToArit <$> memory

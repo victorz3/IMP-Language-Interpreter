@@ -43,7 +43,12 @@ data Loc
             --   the 'Int' parameter.
   deriving (Show, Eq)
  
--- Returns the length of a program in AST length.
+{- | 'lenP' returns the length of a program. Length is computed with the
+     following formula:
+     #non-integer-AST-nodes + #integer-bits
+     where #integer-bits is the number of bits needed to represent all the
+    integers in the program.
+-}
 lenP :: Program -> Int
 lenP Skip = 1
 lenP (Assign l a) = 1 + (lenL l) + (lenA a)
@@ -52,11 +57,16 @@ lenP (If b p1 p2) = 1 + (lenB b) + (lenP p1) + (lenP p2)
 lenP (While b p) = 1 + (lenB b) + (lenP p)
 lenP NoHalt = 1
 
--- Returns the length of a location in AST length.
+{- | 'lenL' returns the length of a location in AST length. The length of
+     the location is computed with the formula 1 + #integer-bits
+-}
 lenL :: Loc -> Int
 lenL (Loc n) = 1 + (lenInt n)
 
--- Return the size of an arithmetic expression in AST length.
+{- | 'lenA' returns the length of an arithmetic expression in AST length.
+     The length of the AE is computed with the same formula used for
+     programs, taking into account AE ASTs instead of program ASTs.
+-}
 lenA :: Arit -> Int
 lenA (In n) = lenInt n
 lenA (Mem l) = lenL l
@@ -64,7 +74,10 @@ lenA (Plus a1 a2) = 1 + (lenA a1) + (lenA a2)
 lenA (Minus a1 a2) = 1 + (lenA a1) + (lenA a2)
 lenA (Times a1 a2) = 1 + (lenA a1) + (lenA a2)
 
--- Returns the size of a boolean expression in AST length.
+{- | 'lenB' returns the length of a boolean expression in AST length.
+     The length of the BE is computed with the same formula used for
+     programs, taking into account ABE ASTs instead of program ASTs.
+-}
 lenB :: BoolExp -> Int
 lenB T = 1
 lenB F = 1
@@ -74,7 +87,9 @@ lenB (Not b) = 1 + (lenB b)
 lenB (Or b1 b2) = 1 + (lenB b1) + (lenB b2)
 lenB (And b1 b2) = 1 + (lenB b1) + (lenB b2)
 
--- Returns the number of bits necessary to represent an integer.
+{- | 'lenInt' returns the number of bits required to represent an
+     'Integral'
+-}
 lenInt :: Integral a => a -> Int
 lenInt 0 = 1
 lenInt 1 = 1
