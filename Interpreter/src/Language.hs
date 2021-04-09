@@ -1,34 +1,47 @@
--- Abstract syntax for while programs
--- Author: Victor Zamora
+{- |
+Module:      Language 
+Description: Module 'Language' contains the abstract syntax of our language
+             (IMP).
+Mantainer:   agua@ciencias.unam.mx
+-}
 module Language where
 
--- A program
-data Program = Skip
-             | Assign Loc Arit
-             | Concat Program Program
-             | If BoolExp Program Program
-             | While BoolExp Program
-             -- Special, non-halting program
-             | NoHalt deriving (Show, Eq)
+-- | Abstract syntax for programs.
+data Program
+  = Skip                       -- | skip program.
+  | Assign Loc Arit            -- | Assignments.
+  | Concat Program Program     -- | Concatenation.
+  | If BoolExp Program Program -- | if expressions.
+  | While BoolExp Program      -- | while expressions.
+  | NoHalt                     -- | Special constructor for programs that
+                               --   we know won't halt.
+  deriving (Show, Eq)
 
--- Arithmetic expression
-data Arit = In Integer
-          | Mem Loc
-          | Plus Arit Arit
-          | Minus Arit Arit
-          | Times Arit Arit deriving (Show, Eq)
+-- | Abstract syntax for arithmetic expressions.
+data Arit
+  = In Integer        -- | Integers.
+  | Mem Loc           -- | Memory locations.
+  | Plus Arit Arit    -- | Sum of two arithmetic expressions.
+  | Minus Arit Arit   -- | Subtraction of two arithmetic expressions.
+  | Times Arit Arit   -- | Multiplication of two arithmetic expressions.
+  deriving (Show, Eq)
 
--- Boolean Expression
-data BoolExp = T
-             | F
-             | Equals Arit Arit
-             | Lessthan Arit Arit
-             | Not BoolExp
-             | Or BoolExp BoolExp
-             | And BoolExp BoolExp deriving (Show, Eq)
+-- | Abstract syntax for boolean expressions.
+data BoolExp
+  = T                   -- | true
+  | F                   -- | false
+  | Equals Arit Arit    -- | Equality of two arithmetic expressions.
+  | Lessthan Arit Arit  -- | Less than for arithmetic expressions.
+  | Not BoolExp         -- | Negation of a boolean expression.
+  | Or BoolExp BoolExp  -- | Or of two boolean expressions.
+  | And BoolExp BoolExp -- | And of two boolean expressions.
+  deriving (Show, Eq)
 
---Memory location
-data Loc = Loc Int deriving (Show, Eq)
+-- | Abstract syntax for memory locations.
+data Loc
+  = Loc Int -- | A location corresponding to the ith register, where i is
+            --   the 'Int' parameter.
+  deriving (Show, Eq)
  
 -- Returns the length of a program in AST length.
 lenP :: Program -> Int
