@@ -95,7 +95,7 @@ simplBoolProgram (While b p)
         p' = simplBoolProgram p
 simplBoolProgram x = x
   
---Evaluation function with optional halting parameter.
+-- Evaluation function with optional halting parameter.
 evalWH :: Program -> StateL -> Int -> (StateL, Int)
 evalWH p s halt = if (halt <= 0)
                       then (replace 0 s (-1), 0)
@@ -206,13 +206,13 @@ execListPrograms lop outputF = map
                                (\t -> executeProgram (fst t) (snd t)
                                  outputF) lop
 
-{- Opens and executes a program file with the following format:
+{- | 'openOpens and executes a program file with the following format:
  - 1st line is an integer stating the program number.
  - 2nd line is an integer stating maximum number of steps to execute.
  - 3rd line and beyond is the program itself, according to the IMP
  - grammar. -}
-openAndExecuteProgram :: String -> IO ()
-openAndExecuteProgram programName = do
+openExecuteAppendProgram :: String -> IO ()
+openExecuteAppendProgram programName = do
   result <- openGetProgramResult programName
   appendFile outputs $ result
 
@@ -224,7 +224,7 @@ openAndExecuteProgram programName = do
 openGetProgramResult :: String -> IO String
 openGetProgramResult p = do
   contents <- ProgramHandler.openProgram p
-  case parse numberedProgramWithHalt "(stdin)" contents of
+  case parse numberedProgramHalt "(stdin)" contents of
     Left e -> error ("Error parsing input: " ++ (show e))
     Right r -> do
       let program = Util.thrd r
@@ -239,12 +239,12 @@ main = do hanP <- openFile programsFile ReadMode
           c <- hGetContents hanP
           let programs = lines c 
           --outputHandle <- openFile outputs AppendMode
-          l <- mapM openAndExecuteProgram programs
+          l <- mapM openExecuteAppendProgram programs
           return ()
 
 
 
-  -- case parse numberedProgramWithHalt "(stdin)" c of
+  -- case parse numberedProgramHalt "(stdin)" c of
           --   Left e -> do putStrLn "Error parsing input:"
           --                print e
           --   Right r -> do
