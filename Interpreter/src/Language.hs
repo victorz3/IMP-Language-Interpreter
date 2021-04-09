@@ -83,3 +83,7 @@ lenInt n = 1 + (lenInt (div n 2))
 -- | 'locToArit' casts a 'Loc' into an 'Arit'.
 locToArit :: Loc -> Arit
 locToArit x = Mem x
+
+-- | 'intToArit' casts an 'Integer' into and 'Arit'.
+intToArit :: Integer -> Arit
+intToArit i = In i

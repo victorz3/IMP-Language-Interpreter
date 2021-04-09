@@ -27,16 +27,11 @@ memory =
      loc <- many1 digit
      char ']'
      return (Loc (read loc :: Int))
-     
---Converts integer to arithmetic expression
-intToArit :: Integer -> Arit
-intToArit i = In i
-
 
 --Arithmetic expressions
 arith :: Parser Arit
 arith = aOp
-        <|> Language.locToArit <$> memory
+        <|> locToArit <$> memory
         <|> intToArit <$> integer
         <?> "an arithmetic expression"
 
