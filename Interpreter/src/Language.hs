@@ -1,36 +1,54 @@
--- Abstract syntax for while programs
--- Author: Victor Zamora
+{- |
+Module:      Language 
+Description: Module 'Language' contains the abstract syntax of our language
+             (IMP).
+Mantainer:   agua@ciencias.unam.mx
+-}
 module Language where
 
--- A program
-data Program = Skip
-             | Assign Loc Arit
-             | Concat Program Program
-             | If BoolExp Program Program
-             | While BoolExp Program
-             -- Special, non-halting program
-             | NoHalt deriving (Show, Eq)
+-- | Abstract syntax for programs.
+data Program
+  = Skip                       -- | skip program.
+  | Assign Loc Arit            -- | Assignments.
+  | Concat Program Program     -- | Concatenation.
+  | If BoolExp Program Program -- | if expressions.
+  | While BoolExp Program      -- | while expressions.
+  | NoHalt                     -- | Special constructor for programs that
+                               --   we know won't halt.
+  deriving (Show, Eq)
 
--- Arithmetic expression
-data Arit = In Integer
-          | Mem Loc
-          | Plus Arit Arit
-          | Minus Arit Arit
-          | Times Arit Arit deriving (Show, Eq)
+-- | Abstract syntax for arithmetic expressions.
+data Arit
+  = In Integer        -- | Integers.
+  | Mem Loc           -- | Memory locations.
+  | Plus Arit Arit    -- | Sum of two arithmetic expressions.
+  | Minus Arit Arit   -- | Subtraction of two arithmetic expressions.
+  | Times Arit Arit   -- | Multiplication of two arithmetic expressions.
+  deriving (Show, Eq)
 
--- Boolean Expression
-data BoolExp = T
-             | F
-             | Equals Arit Arit
-             | Lessthan Arit Arit
-             | Not BoolExp
-             | Or BoolExp BoolExp
-             | And BoolExp BoolExp deriving (Show, Eq)
+-- | Abstract syntax for boolean expressions.
+data BoolExp
+  = T                   -- | true
+  | F                   -- | false
+  | Equals Arit Arit    -- | Equality of two arithmetic expressions.
+  | Lessthan Arit Arit  -- | Less than for arithmetic expressions.
+  | Not BoolExp         -- | Negation of a boolean expression.
+  | Or BoolExp BoolExp  -- | Or of two boolean expressions.
+  | And BoolExp BoolExp -- | And of two boolean expressions.
+  deriving (Show, Eq)
 
---Memory location
-data Loc = Loc Int deriving (Show, Eq)
+-- | Abstract syntax for memory locations.
+data Loc
+  = Loc Int -- | A location corresponding to the ith register, where i is
+            --   the 'Int' parameter.
+  deriving (Show, Eq)
  
--- Returns the length of a program in AST length.
+{- | 'lenP' returns the length of a program. Length is computed with the
+     following formula:
+     #non-integer-AST-nodes + #integer-bits
+     where #integer-bits is the number of bits needed to represent all the
+    integers in the program.
+-}
 lenP :: Program -> Int
 lenP Skip = 1
 lenP (Assign l a) = 1 + (lenL l) + (lenA a)
@@ -39,11 +57,16 @@ lenP (If b p1 p2) = 1 + (lenB b) + (lenP p1) + (lenP p2)
 lenP (While b p) = 1 + (lenB b) + (lenP p)
 lenP NoHalt = 1
 
--- Returns the length of a location in AST length.
+{- | 'lenL' returns the length of a location in AST length. The length of
+     the location is computed with the formula 1 + #integer-bits
+-}
 lenL :: Loc -> Int
 lenL (Loc n) = 1 + (lenInt n)
 
--- Return the size of an arithmetic expression in AST length.
+{- | 'lenA' returns the length of an arithmetic expression in AST length.
+     The length of the AE is computed with the same formula used for
+     programs, taking into account AE ASTs instead of program ASTs.
+-}
 lenA :: Arit -> Int
 lenA (In n) = lenInt n
 lenA (Mem l) = lenL l
@@ -51,7 +74,10 @@ lenA (Plus a1 a2) = 1 + (lenA a1) + (lenA a2)
 lenA (Minus a1 a2) = 1 + (lenA a1) + (lenA a2)
 lenA (Times a1 a2) = 1 + (lenA a1) + (lenA a2)
 
--- Returns the size of a boolean expression in AST length.
+{- | 'lenB' returns the length of a boolean expression in AST length.
+     The length of the BE is computed with the same formula used for
+     programs, taking into account ABE ASTs instead of program ASTs.
+-}
 lenB :: BoolExp -> Int
 lenB T = 1
 lenB F = 1
@@ -61,8 +87,18 @@ lenB (Not b) = 1 + (lenB b)
 lenB (Or b1 b2) = 1 + (lenB b1) + (lenB b2)
 lenB (And b1 b2) = 1 + (lenB b1) + (lenB b2)
 
--- Returns the number of bits necessary to represent an integer.
+{- | 'lenInt' returns the number of bits required to represent an
+     'Integral'
+-}
 lenInt :: Integral a => a -> Int
 lenInt 0 = 1
 lenInt 1 = 1
 lenInt n = 1 + (lenInt (div n 2))
+
+-- | 'locToArit' casts a 'Loc' into an 'Arit'.
+locToArit :: Loc -> Arit
+locToArit x = Mem x
+
+-- | 'intToArit' casts an 'Integer' into and 'Arit'.
+intToArit :: Integer -> Arit
+intToArit i = In i

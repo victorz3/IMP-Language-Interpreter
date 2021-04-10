@@ -26,6 +26,8 @@ dependencies:
 - random
 - sort
 - time
+- parsec
+- integer-logarithms
 
 library:
   source-dirs: src
