@@ -1,4 +1,4 @@
-cabal-version: 1.12
+cabal-version: 2.2
 
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
@@ -6,14 +6,14 @@ cabal-version: 1.12
 
 name:           Interpreter
 version:        0.1.0.0
+synopsis:       This is an interpreter for the IMP language. To read more about the IMP language, please check the README.md file.
 description:    Please see the README on GitHub at <https://github.com/victorz3/Interpreter#readme>
 homepage:       https://github.com/victorz3/Interpreter#readme
 bug-reports:    https://github.com/victorz3/Interpreter/issues
 author:         Victor Zamora
 maintainer:     victor.z@ciencias.unam.mx
 copyright:      Copyright (c) 2020 Victor Zamora
-license:        MIT
-license-file:   LICENSE
+license:        GPL-3.0-or-later
 build-type:     Simple
 extra-source-files:
     README.md
@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Eval
       Language
       Parser
       ProgramHandler
@@ -40,7 +41,7 @@ library
   default-language: Haskell2010
 
 executable Interpreter-exe
-  main-is: Eval.hs
+  main-is: Main.hs
   other-modules:
       Paths_Interpreter
   hs-source-dirs:

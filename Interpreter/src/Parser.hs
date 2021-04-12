@@ -14,10 +14,18 @@ digitsToInteger = do
   num <- many1 digit
   return (read num)
 
+-- | 'negative' parses a negative integer.
+negative :: Parser Integer
+negative = do
+  sign <- char '-'
+  number <- many1 digit
+  return (read (sign:number))
+
 -- | 'integer' parses an integer.
 integer :: Parser Integer
-integer = digitsToInteger
-          <?> "a natural integer"
+integer = negative <|>
+          digitsToInteger <?>
+          "a natural integer"
   
 -- | 'memory' parses memory locations in the IMP syntax.
 memory :: Parser Loc

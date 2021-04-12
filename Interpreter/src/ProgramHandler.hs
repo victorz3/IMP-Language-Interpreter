@@ -11,7 +11,7 @@ import System.IO
 -- Folder containing program files.
 folder = "programs/"
 -- File extension for our programs.
-extension = ".while"
+extension = ".imp"
 
 {- | The 'openProgram' function opens a program file by adding
      the correct extension and looking in the correct folder.
