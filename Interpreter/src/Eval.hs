@@ -219,6 +219,7 @@ evalBoolWH (And b1 b2) s halt = let p1 = (evalBoolWH b1 s halt)
      If the parameter passed to this function is negative, the tuple
      '(-1, 0)' is returned, indicating an error.
 -}
+
 natIntoString :: Integer -> (Integer, Int)
 natIntoString 0 = (0, 1)
 natIntoString n = if n > 0
@@ -250,7 +251,16 @@ getStringFromTuple (n, m)
 getReturnValue :: State -> String
 getReturnValue s = getStringFromTuple $ natIntoString $ getValue s 0 
 
-                                                      
+{- | 'concatOutput' is implemented as an alternative function for getting
+     a program's output. The function concatenates all binary
+     representations of the numbers in the memory.
+
+-}
+concatOutput :: State -> String
+concatOutput [] = ""
+concatOutput (x:xs) = (showIntAtBase 2 intToDigit (snd x) "") ++
+                      (concatOutput xs)
+                   
 {- | 'executeProgram' takes a 'Program' a number of steps to run (if this
      number ends up being '0' or less, a default value indicated by the
      constant 'maxSteps' is used), and an output function (which is to
