@@ -61,22 +61,3 @@ Patricia
 100000 direcciones:
 2.256, 2.322, 2.464, 2.498, 2.274, 2.368, 2.242, 2.174, 2.202, 2.174
 2.2974
-=======
-
-Tiempo versión con arreglos:
-100 direcciones:
-
-Promedio
-
-Sin arreglos:
-1000 direcciones:
-Promedio
-
-Con arreglos:
-1000 direcciones:
-
-Sin arreglos:
-10000 direcciones:
-
-Con arreglos:
-10000 direcciones:
