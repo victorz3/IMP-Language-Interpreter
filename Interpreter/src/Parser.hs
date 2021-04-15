@@ -43,7 +43,6 @@ arith = aOp
         <|> intToArit <$> integer
         <?> "an arithmetic expression"
 
-
 -- | 'aOp' parses an arithmetic operation, be it '+', '-', or '*'.
 aOp :: Parser Arit
 aOp = do
@@ -154,7 +153,6 @@ ifParser = do
   p2 <- program
   char ')'
   return (If b p1 p2)
-
 
 -- | 'program' parses a 'Program'.
 program :: Parser Program
