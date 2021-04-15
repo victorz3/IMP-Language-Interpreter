@@ -57,6 +57,6 @@ main :: IO ()
 main = do hanP <- openFile programsFile ReadMode
           c <- hGetContents hanP
           let programs = lines c 
-                  --outputHandle <- openFile outputs AppendMode
+          --outputHandle <- openFile outputs AppendMode
           l <- mapM openExecuteAppendProgram programs
           return ()       
