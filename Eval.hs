@@ -149,6 +149,13 @@ getNat i = if i >= 0
            then 2 * i
            else (-2) * i - 1
 
+-- Alternative function to get a natural from an integer.
+getNat2 :: Integer -> Integer
+getNat2 i = if i > 0
+            then 2 * i -1
+            else -2 * i
+
+
 {- Returns the ith String in canonical order.
    This function returns a tuple where the first element is
    the numeric output and the second element is the number
@@ -169,7 +176,18 @@ getStringFromTuple (0, x) = replicate x '0'
 getStringFromTuple (n, m) = let stringn = showIntAtBase 2 intToDigit n ""
                             in replicate (m - (integerLog2 n) - 1) '0' ++
                                stringn
-                           
+
+-- Return program output by concatenating memory
+getOutputConcatMemory :: StateL -> String
+getOutputConcatMemory [] = "0"
+getOutputConcatMemory l = concatOutput l 
+
+-- Auxiliary function for concatenating the memory.
+concatOutput :: StateL -> String
+concatOutput [] = ""
+concatOutput (x:xs) = (showIntAtBase 2 intToDigit (getNat (snd x)) "") ++
+                    concatOutput xs
+                               
 --Executes the program and returns a value.
 --This function receives a function that gets the return value from the state.
 executeProgram :: Program -> (StateL -> String) -> String

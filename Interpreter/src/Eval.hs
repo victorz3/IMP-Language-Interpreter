@@ -207,17 +207,6 @@ evalBoolWH (And b1 b2) s halt = let p1 = (evalBoolWH b1 s halt)
                                    then (False, (snd p1) -1)
                                    else (evalBoolWH b2 s ((snd p1) - 1))
 
-
-{- | 'getReturnValue' takes a 'State', obtains the value "i" of the 0th
-     register, and returns the ith binary string in canonical order, where
-     canonical order is the total order that orders first by length and
-     then by lexicographical order.
-     The first ten binary strings in canonical order are:
-     0, 1, 00, 01, 10, 11, 000, 001, 010, 011.
--}
-getReturnValue :: State -> String
-getReturnValue s = getStringFromTuple $ natIntoString $ getValue s 0 
-
 {- | 'natIntoString' takes a natural number "n" and obtains the nth binary
      string in canonical order.
      This function returns a 'Tuple' where the first element is the binary
@@ -230,6 +219,7 @@ getReturnValue s = getStringFromTuple $ natIntoString $ getValue s 0
      If the parameter passed to this function is negative, the tuple
      '(-1, 0)' is returned, indicating an error.
 -}
+
 natIntoString :: Integer -> (Integer, Int)
 natIntoString 0 = (0, 1)
 natIntoString n = if n > 0
@@ -250,7 +240,27 @@ getStringFromTuple (n, m)
   | n == 0 = replicate m '0'
   | otherwise = replicate (m - (integerLog2 n) - 1) '0' ++ stringn
   where stringn = showIntAtBase 2 intToDigit n ""
-                                                      
+ 
+{- | 'getReturnValue' takes a 'State', obtains the value "i" of the 0th
+     register, and returns the ith binary string in canonical order, where
+     canonical order is the total order that orders first by length and
+     then by lexicographical order.
+     The first ten binary strings in canonical order are:
+     0, 1, 00, 01, 10, 11, 000, 001, 010, 011.
+-}
+getReturnValue :: State -> String
+getReturnValue s = getStringFromTuple $ natIntoString $ getValue s 0 
+
+{- | 'concatOutput' is implemented as an alternative function for getting
+     a program's output. The function concatenates all binary
+     representations of the numbers in the memory.
+
+-}
+concatOutput :: State -> String
+concatOutput [] = ""
+concatOutput (x:xs) = (showIntAtBase 2 intToDigit (snd x) "") ++
+                      (concatOutput xs)
+                   
 {- | 'executeProgram' takes a 'Program' a number of steps to run (if this
      number ends up being '0' or less, a default value indicated by the
      constant 'maxSteps' is used), and an output function (which is to
