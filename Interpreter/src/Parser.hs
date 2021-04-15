@@ -199,5 +199,3 @@ numberedProgramHalt = do
   spaces
   p <- program
   return (number, halt, p)
-          
- 
