@@ -6,11 +6,8 @@ Mantainer:   agua@ciencias.unam.mx
 
 module Eval where
 
-import Data.Char (intToDigit)
 import Data.Maybe
 import Language
-import Math.NumberTheory.Logarithms
-import Numeric (showIntAtBase)
 import Output
 import qualified Util
 
@@ -217,16 +214,6 @@ evalBoolWH (And b1 b2) s halt = let p1 = (evalBoolWH b1 s halt)
 -}
 getReturnValue :: State -> String
 getReturnValue s = getStringFromTuple $ natIntoString $ getValue s 0 
-
-{- | 'concatOutput' is implemented as an alternative function for getting
-     a program's output. The function concatenates all binary
-     representations of the numbers in the memory.
-
--}
-concatOutput :: State -> String
-concatOutput [] = ""
-concatOutput (x:xs) = (showIntAtBase 2 intToDigit (snd x) "") ++
-                      (concatOutput xs)
                    
 {- | 'executeProgram' takes a 'Program' a number of steps to run (if this
      number ends up being '0' or less, a default value indicated by the
