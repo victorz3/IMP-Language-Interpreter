@@ -102,3 +102,21 @@ locToArit x = Mem x
 -- | 'intToArit' casts an 'Integer' into and 'Arit'.
 intToArit :: Integer -> Arit
 intToArit i = In i
+
+{- | 'memoryAux' takes a program an returns a list with all the registers
+     the program uses.
+-}
+memoryAux :: Program -> [Int] -> [Int]
+memoryAux (Assign (Loc i) a) reg = if elem i reg
+                                   then reg
+                                   else (i:reg)
+memoryAux (Concat p1 p2) reg = let reg' = memoryAux p1
+                               in (memoryAux p2 reg')
+memoryAux (If b p1 p2) reg = let reg' = memoryAux p1
+                        in (memoryAux p2 reg')
+memoryAux (While b p) reg = memoryAux p reg
+memoryAux _ reg = reg
+
+-- | 'memory' takes a program and returns the number of registers it uses.
+memory :: Program -> Int
+memory p = length $ memoryAux p []
