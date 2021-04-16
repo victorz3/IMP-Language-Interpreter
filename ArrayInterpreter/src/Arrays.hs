@@ -1,24 +1,40 @@
--- Evaluator for our while language expressions.
--- This version uses arrays instead of lists.
--- Author: Victor Zamora
+{- |
+Module:      Arrays
+Description: This library is for evaluating programs in our language (IMP)
+             using arrays for the interpreter's memory.
+Mantainer:   agua@ciencias.unam.mx
+-}
+
+module Arrays where
+
 import Language
 import Parser hiding (main)
 import Text.ParserCombinators.Parsec hiding (State)
 import Control.Monad.ST
 import qualified Data.Vector.Mutable as Vec
 
---Gets value in array location.
+{- | 'getValueA' takes a 'MVector' and an 'Int' and returns the 'MVector''s
+     value in the posicion specified by the 'Int'. This function is
+     unsafe, meaning it does not check that the value actually exists
+     before trying to read it.
+-}
 getValueA :: Vec.MVector s Integer -> Int -> ST s Integer
 getValueA v i = do
   value <- Vec.read v i
   return value
 
---Replaces a value in an array location.
+{- | 'replaceA' takes a 'MVector', an'Int', and an 'Integer' and replaces
+     the value at the position specified by the second parameter for the
+     third parameter. This function is unsafe, meaning it does not check
+     that the value actually exists before trying to replace it.
+-}
 replaceA :: Int -> Vec.MVector s Integer -> Integer -> ST s ()
 replaceA i v j = do
   Vec.write v i j 
 
--- Evaluation function which uses array locations.
+{- | 'evalA' does the evaluation of a 'Program' with a 'MVector' used to
+     represent the memory.
+-}
 evalA :: Program -> Vec.MVector s Integer -> ST s ()
 evalA Skip _ = do
   return ()
@@ -42,8 +58,10 @@ evalA (While b p) v = do
     True -> evalA (Concat p (While b p)) v
     otherwise -> return ()
   return ()    
-  
--- Evaluates an arithmetic expression using a vector as memory
+   
+{- | 'evalAritA' does the evaluation of an 'Arit' with a 'MVector' used to
+     represent the memory.
+-}
 evalAritA :: Arit -> Vec.MVector s Integer -> ST s Integer
 evalAritA (In n) _ = do
   return n
@@ -63,7 +81,9 @@ evalAritA (Times a1 a2) v = do
   e2 <- evalAritA a2 v
   return (e1 * e2)
 
--- Evaluates a boolean expression using arrays.
+{- | 'evalBoolA' does the evaluation of a 'BoolExp' with a 'MVector' used
+     to represent the memory.
+-}
 evalBoolA :: BoolExp -> Vec.MVector s Integer -> ST s Bool
 evalBoolA T _ = do
   return True
@@ -89,23 +109,13 @@ evalBoolA (And a1 a2) v = do
   b2 <- evalBoolA a2 v
   return (b1 && b2)
 
--- Gets the return value of a program using arrays
--- Using constant array size for now, but eventually will have to allocate.
-getReturnValue0A :: Program -> ST s Integer
-getReturnValue0A p = do
+{- | 'getReturnValue0' runs a program with a 'MVector' as memory and
+     returns the value at register '0' (or position '0' of the 'MVector')
+     at the end of the execution.
+-}
+getReturnValue0 :: Program -> ST s Integer
+getReturnValue0 p = do
+  -- TODO: Compute memory needed.
   v <- Vec.replicate 100000 0
   evalA p v
   Vec.read v 0
-
---Removes ST monad from program's return value (when using arrays)
-getIntegerReturnValue :: Program -> Integer 
-getIntegerReturnValue p = runST $ getReturnValue0A p
-
--- Versión con arreglos                     
-main :: IO ()
-main =
-    do c <- getContents
-       case parse program "(stdin)" c of
-            Left e -> do putStrLn "Error parsing input:"
-                         print e
-            Right r -> print (getIntegerReturnValue r)

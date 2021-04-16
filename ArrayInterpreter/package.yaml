@@ -1,10 +1,10 @@
 name:                ArrayInterpreter
 version:             0.1.0.0
-github:              "githubuser/ArrayInterpreter"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2021 Author name here"
+github:              "victorz3/IMP-Language-Interpreter/ArrayInterpreter"
+license:             GPL-3
+author:              "Victor Zamora"
+maintainer:          "agua@ciencias.unam.mx"
+copyright:           "2021 Victor Zamora"
 
 extra-source-files:
 - README.md
@@ -21,6 +21,9 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- integer-logarithms
+- parsec
+- vector
 
 library:
   source-dirs: src
