@@ -1,48 +1,46 @@
-name:                Interpreter
+name:                ArrayInterpreter
 version:             0.1.0.0
-github:              "victorz3/Interpreter"
-license:             GPL-3.0-or-later
+github:              "victorz3/IMP-Language-Interpreter/ArrayInterpreter"
+license:             GPL-3
 author:              "Victor Zamora"
-maintainer:          "victor.z@ciencias.unam.mx"
-copyright:           "Copyright (c) 2020 Victor Zamora"
+maintainer:          "agua@ciencias.unam.mx"
+copyright:           "2021 Victor Zamora"
 
 extra-source-files:
 - README.md
 - ChangeLog.md
 
 # Metadata used when publishing your package
-synopsis:            This is an interpreter for the IMP language. To read more
-                     about the IMP language, please check the README.md file.
-#category:            Web
+# synopsis:            Short description of your package
+# category:            Web
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/victorz3/Interpreter#readme>
+description:         Please see the README on GitHub at <https://github.com/githubuser/ArrayInterpreter#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- parsec 
 - integer-logarithms
+- parsec
 - vector
 
 library:
   source-dirs: src
 
 executables:
-  Interpreter-exe:
-    main:	         Main.hs
+  ArrayInterpreter-exe:
+    main:                Main.hs
     source-dirs:         app
     ghc-options:
-    - -O2
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - Interpreter
+    - ArrayInterpreter
 
 tests:
-  Interpreter-test:
+  ArrayInterpreter-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -50,4 +48,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - Interpreter
+    - ArrayInterpreter

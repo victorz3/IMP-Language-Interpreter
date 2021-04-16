@@ -1,22 +1,33 @@
---Parser for while programs
---Author: Victor Zamora
+{- |
+Module:      Parser 
+Description: This library is for parsing programs in our language (IMP).
+Mantainer:   agua@ciencias.unam.mx
+-}
 module Parser where
 
-import Text.ParserCombinators.Parsec
 import Language
+import Text.ParserCombinators.Parsec
 
--- Parses a natural number.
+-- | 'digitsToInteger' parses a String of digits into an integer.
 digitsToInteger :: Parser Integer
 digitsToInteger = do
   num <- many1 digit
   return (read num)
 
--- Parser for natural integers.
+-- | 'negative' parses a negative integer.
+negative :: Parser Integer
+negative = do
+  sign <- char '-'
+  number <- many1 digit
+  return (read (sign:number))
+
+-- | 'integer' parses an integer.
 integer :: Parser Integer
-integer = digitsToInteger
-          <?> "a natural integer"
+integer = negative <|>
+          digitsToInteger <?>
+          "a natural integer"
   
--- References
+-- | 'memory' parses memory locations in the IMP syntax.
 memory :: Parser Loc
 memory = 
   do char 'x'
@@ -25,24 +36,14 @@ memory =
      char ']'
      return (Loc (read loc :: Int))
 
---Converts location to arithmetic expression
-locToArit :: Loc -> Arit
-locToArit x = Mem x
-
---Converts integer to arithmetic expression
-intToArit :: Integer -> Arit
-intToArit i = In i
-
-
---Arithmetic expressions
+-- | 'arith' parses an arithmetic expression.
 arith :: Parser Arit
 arith = aOp
         <|> locToArit <$> memory
         <|> intToArit <$> integer
         <?> "an arithmetic expression"
 
-
---Arithmetic operation
+-- | 'aOp' parses an arithmetic operation, be it '+', '-', or '*'.
 aOp :: Parser Arit
 aOp = do
   char '('
@@ -57,7 +58,7 @@ aOp = do
     '-' -> return (Minus a1 a2)
     '*' -> return (Times a1 a2)
 
---Arithmetic comparison
+-- | 'arithComp' parses an arithmetic comparison.
 arithComp :: Parser BoolExp
 arithComp = do
   char '('
@@ -71,7 +72,7 @@ arithComp = do
     '=' -> return (Equals a1 a2)
     '<' -> return (Lessthan a1 a2)
 
--- Parses a boolean negation.
+-- | 'notBool' parses a boolean negation.
 notBool :: Parser BoolExp
 notBool = do
   string "not"
@@ -79,7 +80,7 @@ notBool = do
   b <- boolean
   return (Not b)
 
--- Parses a boolean binary operation.
+-- | 'boolBin' parses a binary operation between booleans ('and' or 'or').
 boolBin :: Parser BoolExp
 boolBin = do
   char '('
@@ -93,7 +94,7 @@ boolBin = do
     "or" -> return (Or b1 b2)
     "and" -> return (And b1 b2)
   
---Boolean expression
+-- | 'boolean' parses a boolean expression.
 boolean :: Parser BoolExp
 boolean = T <$ string "true"
           <|> F <$ string "false"
@@ -102,7 +103,7 @@ boolean = T <$ string "true"
           <|> boolBin
           <?> "a boolean expression"
 
--- Parses an assignment
+-- | 'assigParser' parses an assignment.
 assigParser :: Parser Program
 assigParser = do
   l <- memory
@@ -112,7 +113,7 @@ assigParser = do
   a <- arith
   return (Assign l a)
 
--- Parses a concatenation.
+-- | 'concatParser' parses a concatenation.
 concatParser :: Parser Program
 concatParser = do
   char '('
@@ -123,7 +124,7 @@ concatParser = do
   char ')'
   return (Concat p1 p2)
 
--- While expression parser
+-- | 'whileParser' parses 'while' expressions.
 whileParser :: Parser Program
 whileParser = do
   string "(while"
@@ -136,7 +137,7 @@ whileParser = do
   char ')'
   return (While b p)
 
--- If expression parser
+-- | 'ifParser' parses 'if' expressions.
 ifParser :: Parser Program
 ifParser = do
   string "(if"
@@ -152,8 +153,8 @@ ifParser = do
   p2 <- program
   char ')'
   return (If b p1 p2)
-  
---Parses a program
+
+-- | 'program' parses a 'Program'.
 program :: Parser Program
 program = try(concatParser)
           <|> Skip <$ string "skip"
@@ -162,12 +163,15 @@ program = try(concatParser)
           <|> try(ifParser)
           <?> "a valid program"
 
--- Parses program without using the first line
-parsewoFirstLine :: Parser Program
-parsewoFirstLine = manyTill anyChar newline *> program
+-- | 'programwoFirstLine' parses a 'Program' ignoring its first line.
+programwoFirstLine :: Parser Program
+programwoFirstLine = manyTill anyChar newline *> program
 
-{- Parses a numbered program. The first line of the String is the number and the
- - rest is the program. -}
+{- | 'numberedProgram' parses a string where the first line represents a
+     program's number and the second line beyond contains a 'Program'.
+     This function returns a 'Tuple' where the first element is the
+     'Program''s number and the second element is the 'Program' itself.
+-}
 numberedProgram :: Parser (Int, Program)
 numberedProgram = do
   number <- many1 digit
@@ -176,11 +180,17 @@ numberedProgram = do
   p <- program
   return (i, p)
 
-{- Parses a numbered program and its halting parameter. The first line of the String
- - is the program's number. The second line indicates number of steps to run. Third
- - line and beyond is the program. -}
-numberedProgramWithHalt :: Parser (Int, Int, Program)
-numberedProgramWithHalt = do
+{- | 'numberedProgramHalt' parses a numbered 'Program' and its halting
+     parameter.
+     The first line of the 'String' is the 'Program''s number.
+     The second line indicates maximum number of steps to execute. 
+     Third line and beyond is the 'Program' itself.
+     This function returns a tuple where the first element is the
+     'Program''s number, the second element is the halting parameter, and
+     the third element is the 'Program' itself.
+-}
+numberedProgramHalt :: Parser (Int, Int, Program)
+numberedProgramHalt = do
   n <- many1 digit
   let number = read n
   spaces
@@ -189,5 +199,3 @@ numberedProgramWithHalt = do
   spaces
   p <- program
   return (number, halt, p)
-          
- 
