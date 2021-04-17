@@ -110,13 +110,15 @@ memoryAux :: Program -> [Int] -> [Int]
 memoryAux (Assign (Loc i) a) reg = if elem i reg
                                    then reg
                                    else (i:reg)
-memoryAux (Concat p1 p2) reg = let reg' = memoryAux p1
+memoryAux (Concat p1 p2) reg = let reg' = memoryAux p1 reg
                                in (memoryAux p2 reg')
-memoryAux (If b p1 p2) reg = let reg' = memoryAux p1
-                        in (memoryAux p2 reg')
+memoryAux (If b p1 p2) reg = let reg' = memoryAux p1 reg
+                             in (memoryAux p2 reg')
 memoryAux (While b p) reg = memoryAux p reg
 memoryAux _ reg = reg
 
--- | 'memory' takes a program and returns the number of registers it uses.
-memory :: Program -> Int
-memory p = length $ memoryAux p []
+{- | 'programMemory' takes a program and returns the number of registers it
+     uses.
+-}
+programMemory :: Program -> Int
+programMemory p = length $ memoryAux p []
