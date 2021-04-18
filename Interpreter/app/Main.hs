@@ -3,7 +3,7 @@
      Maintainer:  agua@ciencias.unam.mx
 -}
 
-import Arrays
+import qualified Eval
 import qualified Language
 import Parser hiding (main)
 import qualified ProgramHandler
@@ -52,18 +52,18 @@ openExecuteAppendProgram :: String -> IO ()
 openExecuteAppendProgram programName = do
   result <- openGetProgramResult programName
   appendFile outputs $ result
-  
--- main :: IO ()
--- main = do hanP <- openFile programsFile ReadMode
---           c <- hGetContents hanP
---           let programs = lines c 
---           --outputHandle <- openFile outputs AppendMode
---           l <- mapM openExecuteAppendProgram programs
---           return ()       
+   
 main :: IO ()
-main =
-    do c <- getContents
-       case parse program "(stdin)" c of
-            Left e -> do putStrLn "Error parsing input:"
-                         print e
-            Right r -> print (getIntegerReturnValue r)
+main = do hanP <- openFile programsFile ReadMode
+          c <- hGetContents hanP
+          let programs = lines c 
+          --outputHandle <- openFile outputs AppendMode
+          l <- mapM openExecuteAppendProgram programs
+          return ()       
+-- main :: IO ()
+-- main = do
+--   c <- getContents
+--   case parse program "(stdin)" c of
+--     Left e -> do putStrLn "Error parsing input:"
+--                  print e
+--     Right r -> print (getIntegerReturnValue r)
