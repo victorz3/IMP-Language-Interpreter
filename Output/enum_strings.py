@@ -1,4 +1,4 @@
-"""Canonical order string enumerator.
+"""Canonical order string enumerator
 
 Program to enumerate strings in canonical order.
 Canonical order of strings is ordering first by length and then by 

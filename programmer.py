@@ -1,15 +1,86 @@
+"""Program writer
+
+This module writes programs for testing. All the programs do is access a
+bunch of memory locations.
+
+Maintainer: agua@ciencias.unam.mx
+"""
+
+import random
 import sys
 
-def programa(n):
-    cuenta_par = 0
+def lots_of_memory(n):
+    """Writes a program that acceses n memory locations.
+    
+    Parameters
+    ----------
+    n : int
+        Number of memory locations that the program should access.
+
+    Returns
+    -------
+    s : string
+        A string with the program that acceses n memory locations.
+    """
+    s = ""
+    paren = 0
     for i in range(n):
         if i != n-1:
-            print("(x[" + str(i) + "] := 40;")
-            cuenta_par += 1
+            s += "(x[" + str(i) + "] := 40;\n"
+            paren += 1
         else:
-            print("x[" + str(i) + "] := 40", end="")
-    for i in range(cuenta_par):
-        print(")", end="")
+            s += "x[" + str(i) + "] := 40"
+    for i in range(paren):
+        s += ")"
+    return s
 
+def lots_of_accesses(n):
+    """Writes a program that uses only 5 memory locatiosn but does n
+       random accesses to it.
+    
+    Parameters
+    ----------
+    n : int
+        Number of times the program should access memory locations.
 
-programa(int(sys.argv[1]))
+    Returns
+    -------
+    s : string
+        A string with the program that acceses n memory locations.
+    """
+    s = ""
+    paren = 0
+    for i in range(n):
+        j = random.randrange(5)
+        if i != n-1:
+            s += "(x[" + str(j) + "] := 20;\n"
+            paren += 1
+        else:
+            s += "x[" + str(j) + "] := 20"
+    for i in range(paren):
+        s += ")"
+    return s
+
+def write_program(filename, size, ptype):
+    """Writes a program to a filename.
+    
+    Parameters
+    ----------
+    filename : string
+        Name of the file where we will write the program (without file 
+        extension).
+    size : int
+        Number of registers the written program will access. 
+    ptype : function
+        Function indicating what type of program will be written.
+    """
+    filename += ".imp"
+    f = open(filename, "w")
+    f.write(ptype(int(size)))
+    f.close()
+    
+# Write program to filename
+if len(sys.argv) < 3:
+    print("Use: python programmer.py <#registers> <program_name>")
+else: 
+    write_program(sys.argv[2], sys.argv[1], lots_of_accesses)
