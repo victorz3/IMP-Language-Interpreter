@@ -7,11 +7,10 @@ Mantainer:   agua@ciencias.unam.mx
 
 module Arrays where
 
-import Language
-import Parser hiding (main)
-import Text.ParserCombinators.Parsec hiding (State)
 import Control.Monad.ST
 import qualified Data.Vector.Mutable as Vec
+import Language
+import Output
 
 {- | 'getValueA' takes a 'MVector' and an 'Int' and returns the 'MVector''s
      value in the posicion specified by the 'Int'. This function is
@@ -110,12 +109,12 @@ evalBoolA (And a1 a2) v = do
   return (b1 && b2)
 
 {- | 'getReturnValue0' runs a program with a 'MVector' as memory and
-     returns the value at register '0' (or position '0' of the 'MVector')
-     at the end of the execution.
+     returns the 'String' corresponding to the value at register '0' (or
+     position '0' of the 'MVector') at the end of the execution.
 -}
-getReturnValue0 :: Program -> ST s Integer
+getReturnValue0 :: Program -> ST s String
 getReturnValue0 p = do
-  -- TODO: Compute memory needed.
-  v <- Vec.replicate 100000 0
+  v <- Vec.replicate (programMemory p) 0
   evalA p v
-  Vec.read v 0
+  result <- Vec.read v 0
+  return (stringFromNat result)

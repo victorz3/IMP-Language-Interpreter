@@ -9,6 +9,7 @@ Examples/*
 
 # Stack generated files
 *.cabal
+*/.stack-work/*
 
 # IMP
 *.imp

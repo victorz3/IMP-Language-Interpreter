@@ -24,9 +24,9 @@ import Numeric (showIntAtBase)
      '(-1, 0)' is returned, indicating an error.
 -}
 
-natIntoString :: Integer -> (Integer, Int)
-natIntoString 0 = (0, 1)
-natIntoString n = if n > 0
+natIntoTuple :: Integer -> (Integer, Int)
+natIntoTuple 0 = (0, 1)
+natIntoTuple n = if n > 0
                   then let l = integerLog2 (n+2)
                        in let c = n - (2^l) + 2
                           in (c, l)
@@ -44,6 +44,12 @@ getStringFromTuple (n, m)
   | n == 0 = replicate m '0'
   | otherwise = replicate (m - (integerLog2 n) - 1) '0' ++ stringn
   where stringn = showIntAtBase 2 intToDigit n ""
+
+{- | 'stringFromNat' returns the 'String' corresponding to the 'Int'
+     parameter in the 'String' enumeration.
+-}
+stringFromNat = getStringFromTuple . natIntoTuple
+
 
 {- | 'concatOutput' is implemented as an alternative function for getting
      a program's output. The function concatenates all binary
