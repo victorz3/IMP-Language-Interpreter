@@ -76,6 +76,7 @@ def write_program(filename, size, ptype):
     """
     filename += ".imp"
     f = open(filename, "w")
+    f.write("0\n0\n")
     f.write(ptype(int(size)))
     f.close()
     
