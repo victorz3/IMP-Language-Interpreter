@@ -1,5 +1,7 @@
 module Main where
 
+import Arrays
+import Control.Monad.ST
 import Language
 import Parser hiding (main)
 import System.IO
@@ -14,6 +16,10 @@ main = do
          Left e -> do
            putStrLn "Error parsing input:"
            print e
-         Right r -> print (programMemory r)
+         Right r -> do
+           let mem = programMemory r
+           let result = getReturnValue0 r
+           --let resultado = runST result
+           print (runST result)
 
         --outputHandle <- openFile outputs AppendMode
