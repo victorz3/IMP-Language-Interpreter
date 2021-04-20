@@ -54,12 +54,16 @@ openExecuteAppendProgram programName = do
   appendFile outputs $ result
    
 main :: IO ()
-main = do hanP <- openFile programsFile ReadMode
-          c <- hGetContents hanP
-          let programs = lines c 
-          --outputHandle <- openFile outputs AppendMode
-          l <- mapM openExecuteAppendProgram programs
-          return ()       
+main = do
+  res <- openGetProgramResult "100000"
+  return ()
+  -- hanP <- openFile programsFile ReadMode
+          -- c <- hGetContents hanP
+          -- let programs = lines c 
+          -- --outputHandle <- openFile outputs AppendMode
+          -- l <- mapM openExecuteAppendProgram programs
+          -- return ()      
+  
 -- main :: IO ()
 -- main = do
 --   c <- getContents

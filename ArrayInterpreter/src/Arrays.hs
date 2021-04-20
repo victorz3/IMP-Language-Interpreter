@@ -108,13 +108,19 @@ evalBoolA (And a1 a2) v = do
   b2 <- evalBoolA a2 v
   return (b1 && b2)
 
-{- | 'getReturnValue0' runs a program with a 'MVector' as memory and
-     returns the 'String' corresponding to the value at register '0' (or
-     position '0' of the 'MVector') at the end of the execution.
+{- | 'executeProgramM' runs a 'Program' with a memory size specified by the
+     'Int' parameter, and returns the program's result ('String'
+     corresponding to the value at location '0') wrapped in the 'ST' monad.
 -}
-getReturnValue0 :: Program -> ST s String
-getReturnValue0 p = do
-  v <- Vec.replicate (programMemory p) 0
+executeProgramM :: Program -> Int -> ST s String
+executeProgramM p mem = do
+  v <- Vec.replicate mem 0
   evalA p v
   result <- Vec.read v 0
   return (stringFromNat result)
+
+{- | 'executeProgram' executes a 'Program' using the 'executeProgramM'
+     function but computing memory needed for execution first.
+-}
+executeProgram :: Program -> ST s String
+executeProgram p = executeProgramM p (programMemory p)
