@@ -19,6 +19,8 @@ maxSteps = 10000
 -- | 'State' represents a memory state using lists.
 type State = [(Int, Integer)]
 
+-- | 
+
 {- | 'getValue' gets the value in a given location of the 'State'.
      If the value is not in the 'State', '0' is returned.
 -}
