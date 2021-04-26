@@ -6,6 +6,7 @@ Mantainer:   agua@ciencias.unam.mx
 
 module Eval where
 
+import qualified Data.IntMap.Strict as M
 import Data.Maybe
 import Language
 import Output
@@ -16,24 +17,21 @@ import qualified Util
 -}
 maxSteps = 10000
 
--- | 'State' represents a memory state using lists.
-type State = [(Int, Integer)]
+-- | 'State' represents a memory state using an 'IntMap'.
+type State = M.IntMap Integer
 
 -- | 'emptyState' returns an empty 'State'
-emptyState = []
+emptyState = M.empty
 
 {- | 'getValue' gets the value in a given location of the 'State'.
      If the value is not in the 'State', '0' is returned.
 -}
 getValue :: State -> Int -> Integer
-getValue l i = fromMaybe 0 (lookup i l)
+getValue l i = fromMaybe 0 (M.lookup i l)
                  
--- | 'replace' replaces a value within a 'State'.
+-- | 'replace' replaces a value within a 'State'
 replace :: Int -> State -> Integer -> State
-replace n [] i = [(n, i)]
-replace n ((a, b):xs) i = if n == a
-                          then ((n, i):xs)
-                          else ((a, b):(replace n xs i))
+replace k m a = M.insert k a m
 
 {- | 'simplBoolExp' simplifies easy-to-simplify 'BoolExp's. For example, it
      simplifies ('Equals' X X) to 'T'.
