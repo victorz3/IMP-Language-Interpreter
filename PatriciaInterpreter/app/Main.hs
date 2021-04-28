@@ -56,7 +56,7 @@ openExecuteAppendProgram programName = do
 main :: IO ()
 main = do
   res <- openGetProgramResult "100000"
-  --print res
+  print res
   return ()
   -- hanP <- openFile programsFile ReadMode
           -- c <- hGetContents hanP
