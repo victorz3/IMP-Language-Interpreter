@@ -33,6 +33,7 @@ openGetProgramResult p = do
 main :: IO ()
 main = do
   res <- openGetProgramResult "100000"
+  --print res
   return ()
 
         --outputHandle <- openFile outputs AppendMode
