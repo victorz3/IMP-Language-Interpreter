@@ -229,6 +229,12 @@ executeProgram p halt f = let halt' = if halt <= 0
                                       else halt
                           in f $ fst $ evalWH p emptyState halt'
 
+{- | 'uExecuteProgram' is an unsafe version of 'executeProgram' that
+     doesn't take into account the halting parameter.
+-}
+uExecuteProgram :: Program -> (State -> String) -> String
+uExecuteProgram p f = f $ eval p emptyState
+
 {- | 'execListPrograms' executes a 'List' of 'Program' using the function
      'executeProgram'.
 -}

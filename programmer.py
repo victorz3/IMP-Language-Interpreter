@@ -35,7 +35,7 @@ def lots_of_memory(n):
     return s
 
 def lots_of_accesses(n):
-    """Writes a program that uses only 5 memory locatiosn but does n
+    """Writes a program that uses only 5 memory locations but does n
        random accesses to it.
     
     Parameters

@@ -38,6 +38,20 @@ openGetProgramResult p = do
                (Eval.executeProgram program steps Eval.getReturnValue) ++
                " " ++ (show (Language.lenP program)) ++ "\n")
 
+{- | 'uOpenGetProgramResult' is an unsafe version of 'openGetProgramResult'
+     that doesn't take into account the halting parameter.
+-}
+uOpenGetProgramResult :: String -> IO String
+uOpenGetProgramResult p = do
+  contents <- ProgramHandler.openProgram p
+  case parse numberedProgramHalt "(stdin)" contents of
+    Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
+    Right r -> do
+      let program = Util.thrd r
+      return ((show (Util.fst r)) ++ " " ++
+               (Eval.uExecuteProgram program Eval.getReturnValue) ++
+               " " ++ (show (Language.lenP program)) ++ "\n")
+
 {- | 'openExecuteAppendProgram' opens and executes a program file with the
      following format:
      - 1st line is an integer stating the program number.
@@ -55,8 +69,8 @@ openExecuteAppendProgram programName = do
    
 main :: IO ()
 main = do
-  res <- openGetProgramResult "100000"
-  print res
+  res <- uOpenGetProgramResult "100000"
+  --print res
   return ()
   -- hanP <- openFile programsFile ReadMode
           -- c <- hGetContents hanP
