@@ -4,20 +4,14 @@ import matplotlib.pyplot as pp
 def graph(yvals, title):
     # x axis values
     x = [100, 1000, 10000, 100000]
-
     pp.plot(x, yvals[0], label='listas')
     pp.plot(x, yvals[1], label='arreglos')
-    pp.plot(x, yvals[2], label='árboles Patricia')
-    
+    pp.plot(x, yvals[2], label='árboles Patricia')    
     pp.xlabel('Número de direcciones de memoria')
-    pp.ylabel('Tiempo en segundos')
-    
-    pp.title(title)
-    
-    pp.xscale("log")
-    
-    pp.legend()
-    
+    pp.ylabel('Tiempo en segundos') 
+    pp.title(title)   
+    pp.xscale("log")    
+    pp.legend()   
     pp.show()
 
 
