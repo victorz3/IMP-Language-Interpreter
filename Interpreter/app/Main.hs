@@ -38,6 +38,20 @@ openGetProgramResult p = do
                (Eval.executeProgram program steps Eval.getReturnValue) ++
                " " ++ (show (Language.lenP program)) ++ "\n")
 
+{- | 'openGetProgramSteps' opens a program, executes it, the number of steps it
+     took for the program to finish, wrapped in the IO monad. 
+-}
+openGetProgramSteps :: String -> IO Int
+openGetProgramSteps p = do
+  contents <- ProgramHandler.openProgram p
+  case parse numberedProgramHalt "(stdin)" contents of
+    Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
+    Right r -> do
+      let program = Util.thrd r
+      let steps = Util.snd r
+      print program
+      return $ Eval.getStepsHalt program steps      
+    
 {- | 'uOpenGetProgramResult' is an unsafe version of 'openGetProgramResult'
      that doesn't take into account the halting parameter.
 -}
@@ -52,8 +66,6 @@ uOpenGetProgramResult p = do
                (Eval.uExecuteProgram program Eval.getReturnValue) ++
                " " ++ (show (Language.lenP program)) ++ "\n")
   
-
-
 {- | 'openExecuteAppendProgram' opens and executes a program file with the
      following format:
      - 1st line is an integer stating the program number.
@@ -71,8 +83,8 @@ openExecuteAppendProgram programName = do
    
 main :: IO ()
 main = do
-  res <- uOpenGetProgramResult "100000"
---  print res
+  pasos <- openGetProgramSteps "nose"
+  print pasos
   return ()
   -- hanP <- openFile programsFile ReadMode
           -- c <- hGetContents hanP

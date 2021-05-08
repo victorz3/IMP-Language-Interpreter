@@ -1,7 +1,7 @@
 {- |
-Module:      Eval
-Description: This library is for evaluating programs in our language (IMP).
-Mantainer:   agua@ciencias.unam.mx
+Module:       Eval
+Description:  This library is for evaluating programs in our language (IMP).
+Maintainer:   agua@ciencias.unam.mx
 -}
 
 module Eval where
@@ -138,76 +138,154 @@ evalBool (And b1 b2) s = ((evalBool b1 s) && (evalBool b2 s))
      parameter indicates the maximum number of steps the program can take.
      If the halting parameter "runs out" (number of steps exceeded), a '-1'
      is saved on location '0', indicating an error.
+     This function returns a tuple where the first element is the returning
+     'State', the second element is the halting parameter, and the third element
+     is the number of steps taken.
 -}
-evalWH :: Program -> State -> Int -> (State, Int)
-evalWH p s halt = if (halt <= 0)
-                  then (replace 0 s (-1), 0)
-                  else (evalWHStep p s halt)
+evalWH :: Program -> State -> Int -> Int -> (State, Int, Int)
+evalWH p s halt steps = if (halt <= 0)
+                  then (replace 0 s (-1), 0, steps)
+                  else (evalWHStep p s halt steps)
 
 {- | 'evalWHStep' evaluates one step and then checks the halting condition
      again.
+     This is an auxiliary function that returns a 3-tuple where the first
+     element is the computed 'State', the second element is the halting
+     parameter, and the third element is the number of steps taken.
 -}
-evalWHStep :: Program -> State -> Int -> (State, Int)
-evalWHStep Skip s halt = (s, halt-1)
-evalWHStep (Assign (Loc x) a) s halt = let p = (evalAritWH a s halt)
-                                       in (replace x s (fst p), (snd p) -1)
-evalWHStep (Concat p1 p2) s halt = let p = (evalWH p1 s halt)
-                                   in (evalWH p2 (fst p) (snd p))
-evalWHStep (If b p1 p2) s halt = let p = (evalBoolWH b s halt)
-                                 in if (fst p)
-                                    then (evalWH p1 s ((snd p) - 1))
-                                    else (evalWH p2 s ((snd p) - 1))
-evalWHStep (While b p) s halt = let p1 = (evalBoolWH b s halt)
-                                in if (fst p1)
-                                   then
-                                     let p2 = (evalWH p s ((snd p1) - 1))
-                                     in (evalWH (While b p)
-                                         (fst p2) (snd p2))
-                                   else (s, (snd p1) - 1)
-
- 
+evalWHStep :: Program -> State -> Int -> Int -> (State, Int, Int)
+evalWHStep Skip s halt steps = (s, halt - 1, steps + 1)
+evalWHStep (Assign (Loc x) a) s halt steps = let p = (evalAritWH
+                                                      a
+                                                      s
+                                                      halt
+                                                      steps)
+                                             in (replace x s (Util.fst p),
+                                                 (Util.snd p) -1,
+                                                 (Util.thrd p) + 1)
+evalWHStep (Concat p1 p2) s halt steps = let p = (evalWH p1 s halt steps)
+                                         in (evalWH p2
+                                             (Util.fst p)
+                                             (Util.snd p)
+                                             (Util.thrd p))
+evalWHStep (If b p1 p2) s halt steps = let p = (evalBoolWH b s halt steps)
+                                       in if (Util.fst p)
+                                          then (evalWH
+                                                 p1
+                                                 s
+                                                 ((Util.snd p) - 1)
+                                                 ((Util.thrd p) + 1))
+                                          else (evalWH
+                                                 p2
+                                                 s
+                                                 ((Util.snd p) - 1)
+                                                 ((Util.thrd p) + 1))
+evalWHStep (While b p) s halt steps = let p1 = (evalBoolWH b s halt steps)
+                                      in if (Util.fst p1)
+                                         then
+                                           let p2 = (evalWH
+                                                      p
+                                                      s
+                                                      ((Util.snd p1) - 1)
+                                                      ((Util.thrd p1) + 1))
+                                           in (evalWH
+                                               (While b p)
+                                               (Util.fst p2)
+                                               (Util.snd p2)
+                                               (Util.thrd p2))
+                                         else (s,
+                                               (Util.snd p1) - 1,
+                                               (Util.thrd p1) + 1)
+                                              
 {- | 'evalAritWH' evaluates an 'Arit' taking into account the halting
-     parameter.
+     parameter and keeping a counter of steps executed.
 -}
-evalAritWH :: Arit -> State -> Int -> (Integer, Int)
-evalAritWH (In n) _ halt = (n, halt)
-evalAritWH (Mem (Loc x)) s halt = ((getValue s x), halt-1)   
-evalAritWH (Plus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
-                                 in let p2 = (evalAritWH a2 s (snd p1))
-                                    in ((fst p1) + (fst p2), (snd p2) -1)
-evalAritWH (Minus a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
-                                  in let p2 = (evalAritWH a2 s (snd p1))
-                                     in (Util.natSub (fst p1) (fst p2),
-                                         (snd p2) -1)
-evalAritWH (Times a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
-                                  in let p2 = (evalAritWH a2 s (snd p1))
-                                     in ((fst p1) * (fst p2), (snd p2) -1)
+evalAritWH :: Arit -> State -> Int -> Int -> (Integer, Int, Int)
+evalAritWH (In n) _ halt steps = (n, halt, steps)
+evalAritWH (Mem (Loc x)) s halt steps = ((getValue s x), halt-1, steps + 1)   
+evalAritWH (Plus a1 a2) s halt steps = let p1 = (evalAritWH a1 s halt steps)
+                                       in let p2 = (evalAritWH
+                                                     a2
+                                                     s
+                                                     (Util.snd p1)
+                                                     (Util.thrd p1))
+                                          in ((Util.fst p1) + (Util.fst p2),
+                                              (Util.snd p2) -1,
+                                              (Util.thrd p2) + 1)
+evalAritWH (Minus a1 a2) s halt steps = let p1 = (evalAritWH a1 s halt steps)
+                                        in let p2 = (evalAritWH
+                                                      a2
+                                                      s
+                                                      (Util.snd p1)
+                                                      (Util.thrd p1))
+                                           in (Util.natSub
+                                                (Util.fst p1)
+                                                (Util.fst p2),
+                                               (Util.snd p2) -1,
+                                               (Util.thrd p2) + 1)
+evalAritWH (Times a1 a2) s halt steps = let p1 = (evalAritWH a1 s halt steps)
+                                        in let p2 = (evalAritWH
+                                                      a2
+                                                      s
+                                                      (Util.snd p1)
+                                                      (Util.thrd p1))
+                                     in ((Util.fst p1) * (Util.fst p2),
+                                         (Util.snd p2) -1,
+                                         (Util.thrd p2) + 1)
 
 {- | 'evalBoolWH' evaluates a 'BoolExp' taking the halting parameter into
-     account.
+     account and keeping a counter of steps executed.
 -}
-evalBoolWH :: BoolExp -> State -> Int -> (Bool, Int)
-evalBoolWH T _ halt = (True, halt)
-evalBoolWH F _ halt = (False, halt)
-evalBoolWH (Equals a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
-                                   in let p2 = (evalAritWH a2 s (snd p1))
-                                      in ((fst p1) == (fst p2),
-                                          (snd p2) - 1)
-evalBoolWH (Lessthan a1 a2) s halt = let p1 = (evalAritWH a1 s halt)
-                                     in let p2 = (evalAritWH a2 s (snd p1))
-                                        in ((fst p1) < (fst p2),
-                                            (snd p2) - 1)
-evalBoolWH (Not b) s halt = let p = (evalBoolWH b s halt)
-                            in (not (fst p), (snd p) -1) 
-evalBoolWH (Or b1 b2) s halt = let p1 = (evalBoolWH b1 s halt)
-                               in if (fst p1)
-                                  then (True, (snd p1) -1)
-                                  else (evalBoolWH b2 s ((snd p1) - 1))
-evalBoolWH (And b1 b2) s halt = let p1 = (evalBoolWH b1 s halt)
-                                in if (not (fst p1))
-                                   then (False, (snd p1) -1)
-                                   else (evalBoolWH b2 s ((snd p1) - 1))
- 
+evalBoolWH :: BoolExp -> State -> Int -> Int -> (Bool, Int, Int)
+evalBoolWH T _ halt steps = (True, halt, steps)
+evalBoolWH F _ halt steps = (False, halt, steps)
+evalBoolWH (Equals a1 a2) s halt steps = let p1 = (evalAritWH a1 s halt steps)
+                                         in let p2 = (evalAritWH
+                                                       a2
+                                                       s
+                                                       (Util.snd p1)
+                                                       (Util.thrd p1))
+                                      in ((Util.fst p1) == (Util.fst p2),
+                                          (Util.snd p2) - 1,
+                                          (Util.thrd p2) + 1)
+evalBoolWH (Lessthan a1 a2) s halt steps = let p1 = (evalAritWH
+                                                      a1
+                                                      s
+                                                      halt
+                                                      steps)
+                                           in let p2 = (evalAritWH
+                                                         a2
+                                                         s
+                                                         (Util.snd p1)
+                                                         (Util.thrd p1))
+                                        in ((Util.fst p1) < (Util.fst p2),
+                                            (Util.snd p2) - 1,
+                                            (Util.thrd p2) + 1)
+evalBoolWH (Not b) s halt steps = let p = (evalBoolWH b s halt steps)
+                                  in (not (Util.fst p),
+                                      (Util.snd p) - 1,
+                                      (Util.thrd p) + 1) 
+evalBoolWH (Or b1 b2) s halt steps = let p1 = (evalBoolWH b1 s halt steps)
+                                     in if (Util.fst p1)
+                                        then (True,
+                                              (Util.snd p1) - 1,
+                                              (Util.thrd p1) + 1)
+                                        else (evalBoolWH
+                                              b2
+                                              s
+                                              ((Util.snd p1) - 1)
+                                              ((Util.thrd p1) + 1))
+evalBoolWH (And b1 b2) s halt steps = let p1 = (evalBoolWH b1 s halt steps)
+                                      in if (not (Util.fst p1))
+                                         then (False,
+                                               (Util.snd p1) -1,
+                                               (Util.thrd p1) + 1)
+                                         else (evalBoolWH
+                                                b2
+                                                s
+                                                ((Util.snd p1) - 1)
+                                                ((Util.thrd p1) + 1))
+  
 {- | 'getReturnValue' takes a 'State', obtains the value "i" of the 0th
      register, and returns the ith binary string in canonical order, where
      canonical order is the total order that orders first by length and
@@ -229,14 +307,13 @@ executeProgram :: Program -> Int -> (State -> String) -> String
 executeProgram p halt f = let halt' = if halt <= 0
                                       then maxSteps
                                       else halt
-                          in f $ fst $ evalWH p emptyState halt'
+                          in f $ Util.fst $ evalWH p emptyState halt' 0
 
 {- | 'uExecuteProgram' is an unsafe version of 'executeProgram' that
      doesn't take into account the halting parameter.
 -}
 uExecuteProgram :: Program -> (State -> String) -> String
 uExecuteProgram p f = f $ eval p emptyState
-
 
 {- | 'execListPrograms' executes a 'List' of 'Program' using the function
      'executeProgram'.
@@ -246,3 +323,12 @@ execListPrograms lop outputF = map
                                (\t -> executeProgram (fst t) (snd t)
                                  outputF)
                                lop              
+
+{- | 'getSepsHalt' takes a program and a halting parameter and it returns the
+     number of steps the program took to halt.
+-}
+getStepsHalt :: Program -> Int -> Int
+getStepsHalt p halt = let halt' = if halt <= 0
+                                  then maxSteps
+                                  else halt
+                      in Util.thrd $ evalWH p emptyState halt' 0
