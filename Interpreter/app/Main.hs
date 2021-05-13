@@ -83,7 +83,7 @@ openExecuteAppendProgram programName = do
    
 main :: IO ()
 main = do
-  res <- openGetProgramResult "random"
+  res <- openGetProgramSteps "random"
   print res
   return ()
   -- hanP <- openFile programsFile ReadMode

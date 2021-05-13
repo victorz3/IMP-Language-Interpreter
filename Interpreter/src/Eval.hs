@@ -18,29 +18,35 @@ maxSteps = 10000
 
 maxMemory = 8192
 
--- | 'State' represents a memory state using lists.
-type State = [(Int, Integer)]
+{- | 'State' represents a memory state using lists.
+     The first element of the tuple is the memory and the second element is the
+     size of the memory (in bits), which is saved to avoid computing it each
+     time it is needed.
+-}
+type State = ([(Int, Integer)], Int)
 
 -- | 'emptyState' returns an empty 'State'
-emptyState = []
+emptyState = ([], 0)
 
 {- | 'getValue' gets the value in a given location of the 'State'.
      If the value is not in the 'State', '0' is returned.
 -}
 getValue :: State -> Int -> Integer
-getValue l i = fromMaybe 0 (lookup i l)
+getValue (l, _) i = fromMaybe 0 (lookup i l)
 
 -- | 'getTotalMem' returns the total memory used in a 'State' (in bits).
 getTotalMem :: State -> Int
-getTotalMem [] = 0
-getTotalMem ((x, n):l) = Util.sizeOf(n) + getTotalMem(l)
+getTotalMem (_, m) = m
                
 replace :: Int -> State -> Integer -> State
-replace n [] i = [(n, i)]
-replace n ((a, b):xs) i = if n == a
-                          then ((n, i):xs)
-                          else ((a, b):(replace n xs i))
-
+replace n ([], m) i = ([(n, i)], m + Util.sizeOf(i)) 
+replace n ((a, b):xs, m) i = if n == a
+                             then let s1 = Util.sizeOf(b)
+                                      s2 = Util.sizeOf(i)
+                                  in ((n, i):xs, m - s1 + s2)  
+                             else let r = replace n (xs, m) i
+                                  in ((a, b):(fst r), snd r)
+  
 {- | 'simplBoolExp' simplifies easy-to-simplify 'BoolExp's. For example, it
      simplifies ('Equals' X X) to 'T'.
 -}
