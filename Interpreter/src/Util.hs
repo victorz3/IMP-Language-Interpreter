@@ -5,6 +5,8 @@ Maintainer:  agua@ciencias.unam.mx
 -}
 module Util where
 
+import Math.NumberTheory.Logarithms
+
 -- | 'natSub' is for doing natural subtraction.
 natSub :: Integer -> Integer -> Integer
 natSub x y
@@ -36,3 +38,6 @@ thrd (_, _, x) = x
 getSizeInBytes :: String -> Int
 getSizeInBytes s = 8 * (length s)
 
+-- | 'sizeOf' returns the size of an 'Integer'.
+sizeOf :: Integer -> Int
+sizeOf i = 1 + (integerLog2 i)

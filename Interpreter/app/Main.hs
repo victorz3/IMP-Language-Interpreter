@@ -40,7 +40,7 @@ openGetProgramResult p = do
 
 {- | 'openGetProgramSteps' opens a program, executes it, the number of steps it
      took for the program to finish, wrapped in the IO monad. 
--}
+-} 
 openGetProgramSteps :: String -> IO Int
 openGetProgramSteps p = do
   contents <- ProgramHandler.openProgram p
@@ -54,7 +54,7 @@ openGetProgramSteps p = do
     
 {- | 'uOpenGetProgramResult' is an unsafe version of 'openGetProgramResult'
      that doesn't take into account the halting parameter.
--}
+-} 
 uOpenGetProgramResult :: String -> IO String
 uOpenGetProgramResult p = do
   contents <- ProgramHandler.openProgram p
@@ -83,8 +83,8 @@ openExecuteAppendProgram programName = do
    
 main :: IO ()
 main = do
-  pasos <- openGetProgramSteps "nose"
-  print pasos
+  res <- openGetProgramResult "random"
+  print res
   return ()
   -- hanP <- openFile programsFile ReadMode
           -- c <- hGetContents hanP
