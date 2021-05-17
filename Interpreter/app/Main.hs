@@ -34,9 +34,10 @@ openGetProgramResult p = do
     Right r -> do
       let program = Util.thrd r
       let steps = Util.snd r
+      let result = Eval.executeProgram program steps Eval.getReturnValue 
       return ((show (Util.fst r)) ++ " " ++
-               (Eval.executeProgram program steps Eval.getReturnValue) ++
-               " " ++ (show (Language.lenP program)) ++ "\n")
+               (fst result) ++ " " ++ (show (Language.lenP program)) ++
+               " " ++ (show (snd result)) ++ "\n")
 
 {- | 'openGetProgramSteps' opens a program, executes it, the number of steps it
      took for the program to finish, wrapped in the IO monad. 
@@ -83,7 +84,7 @@ openExecuteAppendProgram programName = do
    
 main :: IO ()
 main = do
-  res <- openGetProgramSteps "random"
+  res <- openGetProgramResult "1"
   print res
   return ()
   -- hanP <- openFile programsFile ReadMode

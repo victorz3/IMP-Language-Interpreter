@@ -303,14 +303,17 @@ getReturnValue s = getStringFromTuple $ natIntoString $ getValue s 0
      number ends up being '0' or less, a default value indicated by the
      constant 'maxSteps' is used), and an output function (which is to
      mean, a function that takes a memory 'State' and returns a 'String')
-     and returns a 'String' with the program's output or the 'String' "err"
-     if the program didn't halt in the required number of steps.
+     and returns a tuple containing two elements.
+     The first element is a 'String' with the program's output or the
+     'String' "err" if the program didn't halt in the required number of steps.
+     The second element is the number of steps the program took to halt.
 -}
-executeProgram :: Program -> Int -> (State -> String) -> String
+executeProgram :: Program -> Int -> (State -> String) -> (String, Int)
 executeProgram p halt f = let halt' = if halt <= 0
                                       then maxSteps
                                       else halt
-                          in f $ Util.fst $ evalWH p emptyState halt' 0
+                              result = evalWH p emptyState halt' 0
+                          in (f (Util.fst result), Util.thrd result)
 
 {- | 'uExecuteProgram' is an unsafe version of 'executeProgram' that
      doesn't take into account the halting parameter.
@@ -321,12 +324,11 @@ uExecuteProgram p f = f $ eval p emptyState
 {- | 'execListPrograms' executes a 'List' of 'Program' using the function
      'executeProgram'.
 -}
-execListPrograms :: [(Program, Int)] -> (State -> String) -> [String]
-execListPrograms lop outputF = map
-                               (\t -> executeProgram
-                                      (fst t)
-                                      (snd t)
-                                      outputF)
+execListPrograms :: [(Program, Int)] -> (State -> String) -> [(String, Int)]
+execListPrograms lop outputF = map (\t -> executeProgram
+                                          (fst t)
+                                          (snd t)
+                                          outputF)
                                lop              
 
 {- | 'getStepsHalt' takes a program and a halting parameter and it returns the
