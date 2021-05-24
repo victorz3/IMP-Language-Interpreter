@@ -3,6 +3,7 @@
      Maintainer:  agua@ciencias.unam.mx
 -}
 
+import qualified Control.Monad.Parallel
 import qualified Eval
 import qualified Language
 import Parser hiding (main)
@@ -24,10 +25,24 @@ outputs = "outputs.txt"
 {- | 'openGetProgramResult' opens a program, executes it, and returns its
      resulting 'String' wrapped in the 'IO' monad.
      The resulting 'String' is of the form:
-     program# result len(program)
+     program# result len(program) steps_taken
 -}
 openGetProgramResult :: String -> IO String
 openGetProgramResult p = do
+  contents <- ProgramHandler.openProgram p
+  case parse program "(stdin)" contents of
+    Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
+    Right r -> do
+      let result = Eval.executeProgram r 0 Eval.getReturnValue
+      return (p ++ " " ++
+        (fst result) ++ " " ++ (show (Language.lenP r)) ++
+        " " ++ (show (snd result)) ++ "\n")
+  
+{- | 'openGetProgramResult2' does the same as 'openGetProgramResult' but it uses
+     files with the format: #program\n#steps\nprogram
+-}
+openGetProgramResult2 :: String -> IO String
+openGetProgramResult2 p = do
   contents <- ProgramHandler.openProgram p
   case parse numberedProgramHalt "(stdin)" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
@@ -50,7 +65,6 @@ openGetProgramSteps p = do
     Right r -> do
       let program = Util.thrd r
       let steps = Util.snd r
-      print program
       return $ Eval.getStepsHalt program steps      
     
 {- | 'uOpenGetProgramResult' is an unsafe version of 'openGetProgramResult'
@@ -81,16 +95,39 @@ openExecuteAppendProgram :: String -> IO ()
 openExecuteAppendProgram programName = do
   result <- openGetProgramResult programName
   appendFile outputs $ result
-   
+
+{- | 'openExecuteListPrograms' reads a list of program names, opens and executes
+     each program in the list.
+     This function is sequential.
+-}
+openExecuteListPrograms :: [String] -> IO ()
+openExecuteListPrograms [] = do return ()
+openExecuteListPrograms (p:r) = do
+  putStrLn ("Program: " ++ p)
+  openExecuteAppendProgram p
+  openExecuteListPrograms r
+
+{- | 'pOpenExecuteListPrograms' is the parallel version of
+     'openExecuteListPrograms'
+-} 
+pOpenExecuteListPrograms :: [String] -> IO [String]
+pOpenExecuteListPrograms l = do
+  list <- Control.Monad.Parallel.mapM openGetProgramResult l
+  return list
+
+writeOutputs :: [String] -> IO ()
+writeOutputs [] = do return ()
+writeOutputs (o:l) = do
+  appendFile outputs o 
+  writeOutputs l
+  
 main :: IO ()
 main = do
-  res <- openGetProgramResult "1"
-  print res
-  return ()
-  -- hanP <- openFile programsFile ReadMode
-          -- c <- hGetContents hanP
-          -- let programs = lines c 
-          -- --outputHandle <- openFile outputs AppendMode
+  hanP <- openFile programsFile ReadMode
+  c <- hGetContents hanP
+  let programs = lines c 
+  openExecuteListPrograms programs
+  
           -- l <- mapM openExecuteAppendProgram programs
           -- return ()      
   
