@@ -14,12 +14,12 @@ import qualified Util
 
 
 -- | 'programsFile is the file containing the names of the programs to run.
-programsFile = "programs.txt"
+programsFile = "programs2.txt"
 
 {- | 'outputs' is the name of the file where the outputs of the programs
      will be written.
 -}
-outputs = "outputs.txt"
+outputs = "outputs2.txt"
 
 
 {- | 'openGetProgramResult' opens a program, executes it, and returns its
@@ -103,7 +103,6 @@ openExecuteAppendProgram programName = do
 openExecuteListPrograms :: [String] -> IO ()
 openExecuteListPrograms [] = do return ()
 openExecuteListPrograms (p:r) = do
-  putStrLn ("Program: " ++ p)
   openExecuteAppendProgram p
   openExecuteListPrograms r
 
@@ -127,7 +126,8 @@ main = do
   c <- hGetContents hanP
   let programs = lines c 
   openExecuteListPrograms programs
-  
+  putStrLn "Everything is fine :)"
+    
           -- l <- mapM openExecuteAppendProgram programs
           -- return ()      
   
