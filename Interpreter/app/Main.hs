@@ -13,7 +13,7 @@ import Text.ParserCombinators.Parsec
 import qualified Util
 
 
--- | 'programsFile is the file containing the names of the programs to run.
+  -- | 'programsFile is the file containing the names of the programs to run.
 programsFile = "programs2.txt"
 
 {- | 'outputs' is the name of the file where the outputs of the programs
@@ -122,6 +122,8 @@ writeOutputs (o:l) = do
   
 main :: IO ()
 main = do
+  -- First, wipe file.
+  writeFile outputs ""
   hanP <- openFile programsFile ReadMode
   c <- hGetContents hanP
   let programs = lines c 

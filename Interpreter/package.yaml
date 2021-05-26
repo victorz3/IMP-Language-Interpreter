@@ -23,7 +23,7 @@ description:         Please see the README on GitHub at <https://github.com/vict
 dependencies:
 - base >= 4.7 && < 5
 - integer-logarithms
-- monad-parallel
+- monad-parallel >= 0.7.2
 - parsec 
 
 library:
