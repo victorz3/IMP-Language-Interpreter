@@ -8,8 +8,6 @@ module ProgramHandler where
 
 import System.IO
 
--- Folder containing program files.
-folder = "programs/"
 -- File extension for our programs.
 extension = ".imp"
 
@@ -21,6 +19,6 @@ extension = ".imp"
 openProgram :: String -> IO String
 openProgram p = do
   programHandle <- openFile
-                   (folder ++ p ++ extension) ReadMode
+                   (p ++ extension) ReadMode
   contents <- hGetContents programHandle
   return contents

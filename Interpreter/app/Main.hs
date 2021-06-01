@@ -19,9 +19,14 @@ import Text.ParserCombinators.Parsec
 import Text.Read
 import qualified Util
 
+-- | 'dataFolder' is the folder where our program data is contained.
+dataFolder = "../Data/"
+
+-- | 'programsFolder' is the folder where the programs to run are contained.
+programsFolder = dataFolder ++ "programs/"
 
 -- | 'programsFile is the file containing the names of the programs to run.
-programsFile = "programs2.txt"
+programsFile = dataFolder ++ "programs2.txt"
 
 {- | 'outputs' is the name of the file where the outputs of the programs
      will be written.
@@ -29,7 +34,7 @@ programsFile = "programs2.txt"
 outputs = "outputs.txt"
 
 -- | 'outputsZip' is the name for the zip file containing the program's outputs.
-outputsZip = "outputs.zip"
+outputsZip = dataFolder ++ "outputs.zip"
 
 -- | 'hash' is the file to contain the MD5 of the outputs file. 
 hashF = "hash.txt"
@@ -42,7 +47,7 @@ hashF = "hash.txt"
 -}
 openGetProgramResult :: String -> IO String
 openGetProgramResult p = do
-  contents <- ProgramHandler.openProgram p
+  contents <- ProgramHandler.openProgram (programsFolder ++ p)
   let halt = head $ lines contents
   let haltN = readMaybe halt :: Maybe Int
   let hP = case haltN of
