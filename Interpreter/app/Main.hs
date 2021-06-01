@@ -3,23 +3,36 @@
      Maintainer:  agua@ciencias.unam.mx
 -}
 
+import Codec.Archive.Zip
 import qualified Control.Monad.Parallel
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as LB
+import qualified Data.ByteString.UTF8 as BU
+import Data.Digest.Pure.MD5
 import qualified Eval
 import qualified Language
 import Parser hiding (main)
 import qualified ProgramHandler
+import System.Environment (getArgs)
 import System.IO
 import Text.ParserCombinators.Parsec
+import Text.Read
 import qualified Util
 
 
-  -- | 'programsFile is the file containing the names of the programs to run.
+-- | 'programsFile is the file containing the names of the programs to run.
 programsFile = "programs2.txt"
 
 {- | 'outputs' is the name of the file where the outputs of the programs
      will be written.
 -}
-outputs = "outputs2.txt"
+outputs = "outputs.txt"
+
+-- | 'outputsZip' is the name for the zip file containing the program's outputs.
+outputsZip = "outputs.zip"
+
+-- | 'hash' is the file to contain the MD5 of the outputs file. 
+hashF = "hash.txt"
 
 
 {- | 'openGetProgramResult' opens a program, executes it, and returns its
@@ -30,10 +43,15 @@ outputs = "outputs2.txt"
 openGetProgramResult :: String -> IO String
 openGetProgramResult p = do
   contents <- ProgramHandler.openProgram p
-  case parse program "(stdin)" contents of
+  let halt = head $ lines contents
+  let haltN = readMaybe halt :: Maybe Int
+  let hP = case haltN of
+        Just x -> x
+        Nothing -> 0
+  case parse optionalHPProgram "(stdin)" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
     Right r -> do
-      let result = Eval.executeProgram r 0 Eval.getReturnValue
+      let result = Eval.executeProgram r hP Eval.getReturnValue
       return (p ++ " " ++
         (fst result) ++ " " ++ (show (Language.lenP r)) ++
         " " ++ (show (snd result)) ++ "\n")
@@ -96,6 +114,18 @@ openExecuteAppendProgram programName = do
   result <- openGetProgramResult programName
   appendFile outputs $ result
 
+{- | 'openGetListResults' opens a list of programs an returns a 'String' with the
+     results of the execution.
+-}
+openGetListResults :: [String] -> IO String
+openGetListResults [] = do
+  return ""
+openGetListResults (p:rest) = do
+  resP <- openGetProgramResult p
+  resL <- openGetListResults rest
+  return (resP ++ resL)
+
+  
 {- | 'openExecuteListPrograms' reads a list of program names, opens and executes
      each program in the list.
      This function is sequential.
@@ -104,7 +134,7 @@ openExecuteListPrograms :: [String] -> IO ()
 openExecuteListPrograms [] = do return ()
 openExecuteListPrograms (p:r) = do
   openExecuteAppendProgram p
-  openExecuteListPrograms r
+  openExecuteListPrograms r  
 
 {- | 'pOpenExecuteListPrograms' is the parallel version of
      'openExecuteListPrograms'
@@ -122,21 +152,16 @@ writeOutputs (o:l) = do
   
 main :: IO ()
 main = do
-  -- First, wipe file.
-  writeFile outputs ""
   hanP <- openFile programsFile ReadMode
   c <- hGetContents hanP
   let programs = lines c 
-  openExecuteListPrograms programs
+  results <- openGetListResults programs
+  -- Compute hash
+  let bResults = BU.fromString results
+  let hash = md5 (LB.fromStrict bResults)
+  -- Create zip
+  s1 <- mkEntrySelector outputs
+  createArchive outputsZip (addEntry Deflate bResults s1)
+  s2 <- mkEntrySelector hashF
+  withArchive outputsZip (addEntry Deflate (md5DigestBytes hash) s2) 
   putStrLn "Everything is fine :)"
-    
-          -- l <- mapM openExecuteAppendProgram programs
-          -- return ()      
-  
--- main :: IO ()
--- main = do
---   c <- getContents
---   case parse program "(stdin)" c of
---     Left e -> do putStrLn "Error parsing input:"
---                  print e
---     Right r -> print (getIntegerReturnValue r)

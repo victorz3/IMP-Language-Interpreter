@@ -22,9 +22,13 @@ description:         Please see the README on GitHub at <https://github.com/vict
 
 dependencies:
 - base >= 4.7 && < 5
+- bytestring
 - integer-logarithms
 - monad-parallel >= 0.7.2.3
-- parsec 
+- parsec
+- pureMD5
+- utf8-string
+- zip
 
 library:
   source-dirs: src
