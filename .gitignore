@@ -1,3 +1,4 @@
+# Trash files
 Ejercicios/*
 *~
 ej.while
@@ -6,6 +7,10 @@ Haskell/*
 .#*
 Examples/*
 *.lock
+*.txt
+*.jar
+*.zip
+*.class
 
 # Stack generated files
 *.cabal
@@ -14,3 +19,4 @@ Examples/*
 # IMP
 *.imp
 *.while
+
