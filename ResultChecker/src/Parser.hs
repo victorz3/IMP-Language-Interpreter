@@ -164,8 +164,14 @@ program = try(concatParser)
           <?> "a valid program"
 
 -- | 'programwoFirstLine' parses a 'Program' ignoring its first line.
-programwoFirstLine :: Parser Program
-programwoFirstLine = manyTill anyChar newline *> program
+programWoFirstLine :: Parser Program
+programWoFirstLine = manyTill anyChar newline *> program
+
+-- | 'optionalHPProgram' parses a program with optional halting parameter.
+optionalHPProgram :: Parser Program
+optionalHPProgram = try(program)
+                    <|> programWoFirstLine
+                    <?> "either a program or a number followed by a program"
 
 {- | 'numberedProgram' parses a string where the first line represents a
      program's number and the second line beyond contains a 'Program'.

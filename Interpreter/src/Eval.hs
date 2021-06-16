@@ -312,7 +312,8 @@ executeProgram :: Program -> Int -> (State -> String) -> (String, Int)
 executeProgram p halt f = let halt' = if halt <= 0
                                       then maxSteps
                                       else halt
-                              result = evalWH p emptyState halt' 0
+                              p' = simplBoolProgram p
+                              result = evalWH p' emptyState halt' 0
                           in (f (Util.fst result), Util.thrd result)
 
 {- | 'uExecuteProgram' is an unsafe version of 'executeProgram' that

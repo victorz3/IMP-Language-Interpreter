@@ -27,6 +27,7 @@ dependencies:
 - monad-parallel >= 0.7.2.3
 - parsec
 - pureMD5
+- strict
 - utf8-string
 - zip
 

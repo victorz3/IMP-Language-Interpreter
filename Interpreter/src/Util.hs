@@ -40,5 +40,6 @@ getSizeInBytes s = 8 * (length s)
 
 -- | 'sizeOf' returns the size of an 'Integer'.
 sizeOf :: Integer -> Int
+sizeOf (-1) = 0 
 sizeOf 0 = 1
 sizeOf i = 1 + (integerLog2 i)

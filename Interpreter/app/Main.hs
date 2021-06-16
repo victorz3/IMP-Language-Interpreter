@@ -4,16 +4,15 @@
 -}
 
 import Codec.Archive.Zip
-import qualified Control.Monad.Parallel
+import qualified Control.Monad.Parallel as P
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.UTF8 as BU
 import Data.Digest.Pure.MD5
 import qualified Eval
 import qualified Language
-import Parser hiding (main)
+import Parser
 import qualified ProgramHandler
-import System.Environment (getArgs)
 import System.IO
 import Text.ParserCombinators.Parsec
 import Text.Read
@@ -26,15 +25,15 @@ dataFolder = "../Data/"
 programsFolder = dataFolder ++ "programs/"
 
 -- | 'programsFile is the file containing the names of the programs to run.
-programsFile = dataFolder ++ "programs2.txt"
+programsFile = dataFolder ++ "programs.txt"
 
 {- | 'outputs' is the name of the file where the outputs of the programs
      will be written.
 -}
-outputs = "outputs.txt"
+outputs = dataFolder ++ "outputs.txt"
 
 -- | 'outputsZip' is the name for the zip file containing the program's outputs.
-outputsZip = dataFolder ++ "outputs.zip"
+outputsZip = dataFolder ++ "outputs2.zip"
 
 -- | 'hash' is the file to contain the MD5 of the outputs file. 
 hashF = "hash.txt"
@@ -122,13 +121,19 @@ openExecuteAppendProgram programName = do
 {- | 'openGetListResults' opens a list of programs an returns a 'String' with the
      results of the execution.
 -}
-openGetListResults :: [String] -> IO String
+openGetListResults :: [String] -> IO [String]
 openGetListResults [] = do
-  return ""
+  return []
 openGetListResults (p:rest) = do
   resP <- openGetProgramResult p
   resL <- openGetListResults rest
-  return (resP ++ resL)
+  return (resP:resL)
+
+  --   return ""
+-- openGetListResults (p:rest) = do
+--   resP <- openGetProgramResult p
+--   resL <- openGetListResults rest
+--   return (resP ++ resL)
 
   
 {- | 'openExecuteListPrograms' reads a list of program names, opens and executes
@@ -146,7 +151,7 @@ openExecuteListPrograms (p:r) = do
 -} 
 pOpenExecuteListPrograms :: [String] -> IO [String]
 pOpenExecuteListPrograms l = do
-  list <- Control.Monad.Parallel.mapM openGetProgramResult l
+  list <- P.mapM openGetProgramResult l
   return list
 
 writeOutputs :: [String] -> IO ()
@@ -159,14 +164,16 @@ main :: IO ()
 main = do
   hanP <- openFile programsFile ReadMode
   c <- hGetContents hanP
-  let programs = lines c 
-  results <- openGetListResults programs
+  let programs = lines c
+  --results <- openGetListResults programs
+  results <- pOpenExecuteListPrograms programs
+  writeOutputs results
   -- Compute hash
-  let bResults = BU.fromString results
-  let hash = md5 (LB.fromStrict bResults)
+ -- let bResults = BU.fromString results
+  --let hash = md5 (LB.fromStrict bResults)
   -- Create zip
-  s1 <- mkEntrySelector outputs
-  createArchive outputsZip (addEntry Deflate bResults s1)
-  s2 <- mkEntrySelector hashF
-  withArchive outputsZip (addEntry Deflate (md5DigestBytes hash) s2) 
+  -- s1 <- mkEntrySelector outputs
+  -- createArchive outputsZip (addEntry Deflate bResults s1)
+  -- s2 <- mkEntrySelector hashF
+  -- withArchive outputsZip (addEntry Deflate (md5DigestBytes hash) s2) 
   putStrLn "Everything is fine :)"

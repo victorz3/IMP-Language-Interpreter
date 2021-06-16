@@ -22,12 +22,13 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - bytestring
+- integer-logarithms
+- parsec
 - pureMD5
 - random
 - sort
+- strict
 - time
-- parsec
-- integer-logarithms
 
 library:
   source-dirs: src

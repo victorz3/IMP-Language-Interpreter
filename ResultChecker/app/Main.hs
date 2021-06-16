@@ -1,29 +1,62 @@
-{- This program checks that results obtained by our collaborators are
- - correct.
- - Author: Victor Zamora -}
+{- | Description: This program checks that results sent by our
+     collaborators are correct.
+     Maintainer: agua@ciencias.unam.mx
+-}
 
--- System libraries.
-import System.IO
 import Control.Monad
+import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as LB
 import Data.Digest.Pure.MD5
-import System.Random
+import qualified Eval
+import qualified ProgramHandler
 import Data.Sort
 import Data.Time.Clock
-
--- Our libraries.
+import Language
+import Parser
+import System.IO
+import System.Random
+import Text.ParserCombinators.Parsec
+import Text.Read
 import qualified Util
-import qualified ProgramHandler
-import qualified Eval
 
--- Name of file with the hash code.
-hashFile = "hash.txt"
--- Name of file containing the results of execution.
-results = "outputs.txt"
--- File containing numbers for executed programs.
-programs = "programs.txt"
--- Number of files to cross-check
+-- | 'dataFolder' is the folder where our program data is contained.
+dataFolder = "../Data/"
+
+-- | 'programsFolder' is the folder where the programs to run are contained.
+programsFolder = dataFolder ++ "programs/"
+
+-- | Name of file with the hash code.
+hashFile = dataFolder ++ "hash.txt"
+
+-- | Name of file containing the results of execution.
+results = dataFolder ++ "outputs.txt"
+
+-- | File containing numbers for executed programs.
+programs = dataFolder ++ "programs2.txt"
+
+-- | Number of files to cross-check
 checks = 3
+
+{- | 'openGetProgramResult' opens a program, executes it, and returns its
+     resulting 'String' wrapped in the 'IO' monad.
+     The resulting 'String' is of the form:
+     program# result len(program) steps_taken
+-}
+openGetProgramResult :: String -> IO String
+openGetProgramResult p = do
+  contents <- ProgramHandler.openProgram (programsFolder ++ p)
+  let halt = head $ lines contents
+  let haltN = readMaybe halt :: Maybe Int
+  let hP = case haltN of
+        Just x -> x
+        Nothing -> 0
+  case parse optionalHPProgram "(stdin)" contents of
+    Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
+    Right r -> do
+      let result = Eval.executeProgram r hP Eval.getReturnValue
+      return (p ++ " " ++
+        (fst result) ++ " " ++ (show (lenP r)) ++
+        " " ++ (show (snd result)) ++ "\n")
 
 {- | 'findResult' finds the result of a specific program within
      a '[String]' containing lines with various programs'
@@ -33,7 +66,7 @@ checks = 3
      number of the specific program we're looking for.
 -}
 findResult :: [String] -> String -> String
-findResult [] p = error ("No entry for program" ++ p)
+findResult [] p = error ("No entry for program " ++ p)
 findResult (s:l) p = let w = words s in
                        if p == head w
                        -- Last element of the line is the
@@ -41,14 +74,9 @@ findResult (s:l) p = let w = words s in
                        then head $ tail $ w
                        else findResult l p
   
--- ^Gets a program's result from the 'results' file.
+-- | Gets a program's result from the 'results' file.
 getProgramResult :: String -> IO String
 getProgramResult p = do
--- First, look for the program's number.
--- Open program.
-  program <- ProgramHandler.openProgram p
--- Parse the program.
-  let num = head $ lines $ program
   rHandle <- openFile results ReadMode
   contents <- hGetContents rHandle
   let l = lines contents
@@ -72,7 +100,7 @@ checkProgramResult p r = do
 -}
 openExecuteCheck :: String -> IO Bool 
 openExecuteCheck program = do
-  result <- Eval.openGetProgramResult program
+  result <- openGetProgramResult program
   let output = ProgramHandler.getOutput result
   rv <- checkProgramResult program output
   return rv
@@ -87,29 +115,29 @@ openExecuteCheck program = do
 -}
 isOutputFileValid :: IO Bool
 isOutputFileValid = do
-  -- First, get value of hash. This step might not be necessary depending
-  -- on how hash is received.
-  handle1 <- openFile hashFile ReadMode
-  c <- hGetContents handle1
-  let hash = take ((length c) - 1) c
+  -- First, get value of hash.
+  hash <- B.readFile hashFile
   -- Now read file bytes.
   fileContent <- LB.readFile results 
   -- Compute md5
-  let hash2 = md5 fileContent
+  let hash2 = md5DigestBytes $ md5 fileContent
   -- Check if hashes match
-  when (hash /= show hash2) (error "File has been corrupted")
-  -- Now execute checks.
-  -- First get the list of executed programs. 
-  handle2 <- openFile programs ReadMode
-  prog <- hGetContents handle2
-  let programs = lines prog
-  -- Get seed from current time.
-  time <- getCurrentTime >>= return . utctDayTime
-  let seed = floor $ toRational $ time
-  let sample = Util.randomSample seed checks programs
-  -- Now, check every program from the sample.
-  resultsMatch <- mapM (openExecuteCheck) sample
-  return ((foldr (&&) True resultsMatch) == True)
+  let b = hash /= hash2
+  if b then (return False)
+    else do
+    -- Now execute checks.
+    -- First get the list of executed programs. 
+    handle2 <- openFile programs ReadMode
+    prog <- hGetContents handle2
+    let programs = lines prog
+    -- Get seed from current time.
+    time <- getCurrentTime >>= return . utctDayTime
+    let seed = floor $ toRational $ time
+    let sample = Util.randomSample seed checks programs
+    print sample
+    -- Now, check every program from the sample.
+    resultsMatch <- mapM (openExecuteCheck) sample
+    return ((foldr (&&) True resultsMatch) == True)
 
   
 main :: IO ()
@@ -117,5 +145,5 @@ main = do
   valid <- isOutputFileValid
   if valid 
     then print "Results are correct!"
-    else error "Result file has been corrupted!"
+    else error "Results are incorrect!"
   

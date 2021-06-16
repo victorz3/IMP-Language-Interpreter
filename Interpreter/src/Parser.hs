@@ -167,7 +167,7 @@ program = try(concatParser)
 programWoFirstLine :: Parser Program
 programWoFirstLine = manyTill anyChar newline *> program
 
--- |
+-- | 'optionalHPProgram' parses a program with optional halting parameter.
 optionalHPProgram :: Parser Program
 optionalHPProgram = try(program)
                     <|> programWoFirstLine

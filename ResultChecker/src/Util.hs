@@ -3,8 +3,9 @@
  -}
 module Util where
 
-import System.Random
 import Data.Sort
+import Math.NumberTheory.Logarithms
+import System.Random
 
 -- Natural subtraction
 natSub :: Integer -> Integer -> Integer
@@ -61,3 +62,8 @@ thrd (_, _, x) = x
 -- Returns the size of a String in bytes.
 getSizeInBytes :: String -> Int
 getSizeInBytes s = 8 * (length s)
+
+-- | 'sizeOf' returns the size of an 'Integer'.
+sizeOf :: Integer -> Int
+sizeOf 0 = 1
+sizeOf i = 1 + (integerLog2 i)
