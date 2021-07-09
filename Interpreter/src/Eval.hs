@@ -26,6 +26,7 @@ maxMemory = 8192
 type State = ([(Int, Integer)], Int)
 
 -- | 'emptyState' returns an empty 'State'
+emptyState :: State
 emptyState = ([], 0)
 
 {- | 'getValue' gets the value in a given location of the 'State'.

@@ -6,6 +6,8 @@ Mantainer:   agua@ciencias.unam.mx
 -}
 module Language where
 
+import Data.Set
+
 -- | Abstract syntax for programs.
 data Program
   = Skip                       -- | skip program.
@@ -106,10 +108,8 @@ intToArit i = In i
 {- | 'memoryAux' takes a program an returns a list with all the registers
      the program uses.
 -}
-memoryAux :: Program -> [Int] -> [Int]
-memoryAux (Assign (Loc i) a) reg = if elem i reg
-                                   then reg
-                                   else (i:reg)
+memoryAux :: Program -> Set Int -> Set Int
+memoryAux (Assign (Loc i) a) reg = insert i reg
 memoryAux (Concat p1 p2) reg = let reg' = memoryAux p1 reg
                                in (memoryAux p2 reg')
 memoryAux (If b p1 p2) reg = let reg' = memoryAux p1 reg
@@ -121,4 +121,4 @@ memoryAux _ reg = reg
      uses.
 -}
 programMemory :: Program -> Int
-programMemory p = length $ memoryAux p []
+programMemory p = size $ memoryAux p empty

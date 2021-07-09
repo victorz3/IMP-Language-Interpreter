@@ -16,19 +16,14 @@ import Util
 openGetProgramResult :: String -> IO String
 openGetProgramResult p = do
   contents <- ProgramHandler.openProgram p
-  case parse numberedProgramHalt "(stdin)" contents of
+  case parse program "(stdin)" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
     Right r -> do
-      let program = Util.thrd r
-      let steps = Util.snd r
-      let result = runST $ Arrays.executeProgramM program 5
-      return ((show (Util.fst r)) ++
-               " " ++
-               -- TODO un-hardcode 5
-               result ++
-               " " ++
-               (show (Language.lenP program)) ++
-               "\n")
+      let program = r
+      let memory = programMemory program
+      print memory
+      let result = runST $ Arrays.executeProgramM program memory
+      return $ result ++ " " ++ (show (Language.lenP program)) ++ "\n"
 
 main :: IO ()
 main = do
@@ -36,4 +31,4 @@ main = do
   --print res
   return ()
 
-        --outputHandle <- openFile outputs AppendMode
+    --outputHandle <- openFile outputs AppendMode
