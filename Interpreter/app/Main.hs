@@ -19,10 +19,10 @@ import Text.Read
 import qualified Util
 
 -- | 'dataFolder' is the folder where our program data is contained.
-dataFolder = "../Data/"
+dataFolder = "../Data/Testing/LotsOfAccesses/"
 
 -- | 'programsFolder' is the folder where the programs to run are contained.
-programsFolder = dataFolder ++ "programs/"
+programsFolder = dataFolder ++ ""
 
 -- | 'programsFile is the file containing the names of the programs to run.
 programsFile = dataFolder ++ "programs.txt"
@@ -94,14 +94,11 @@ openGetProgramSteps p = do
 -} 
 uOpenGetProgramResult :: String -> IO String
 uOpenGetProgramResult p = do
-  contents <- ProgramHandler.openProgram p
-  case parse numberedProgramHalt "(stdin)" contents of
+  contents <- ProgramHandler.openProgram (programsFolder ++ p)
+  case parse program "" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
     Right r -> do
-      let program = Util.thrd r
-      return ((show (Util.fst r)) ++ " " ++
-               (Eval.uExecuteProgram program Eval.getReturnValue) ++
-               " " ++ (show (Language.lenP program)) ++ "\n")
+      return (Eval.uExecuteProgram r Eval.getReturnValue)
   
 {- | 'openExecuteAppendProgram' opens and executes a program file with the
      following format:
@@ -128,13 +125,6 @@ openGetListResults (p:rest) = do
   resP <- openGetProgramResult p
   resL <- openGetListResults rest
   return (resP:resL)
-
-  --   return ""
--- openGetListResults (p:rest) = do
---   resP <- openGetProgramResult p
---   resL <- openGetListResults rest
---   return (resP ++ resL)
-
   
 {- | 'openExecuteListPrograms' reads a list of program names, opens and executes
      each program in the list.
@@ -162,18 +152,25 @@ writeOutputs (o:l) = do
   
 main :: IO ()
 main = do
-  hanP <- openFile programsFile ReadMode
-  c <- hGetContents hanP
-  let programs = lines c
-  --results <- openGetListResults programs
-  results <- pOpenExecuteListPrograms programs
-  writeOutputs results
-  -- Compute hash
- -- let bResults = BU.fromString results
-  --let hash = md5 (LB.fromStrict bResults)
-  -- Create zip
-  -- s1 <- mkEntrySelector outputs
-  -- createArchive outputsZip (addEntry Deflate bResults s1)
-  -- s2 <- mkEntrySelector hashF
-  -- withArchive outputsZip (addEntry Deflate (md5DigestBytes hash) s2) 
-  putStrLn "Everything is fine :)"
+  result <- uOpenGetProgramResult "prueba100"
+  putStrLn result
+
+
+
+
+
+  -- hanP <- openFile programsFile ReadMode
+ --  c <- hGetContents hanP
+ --  let programs = lines c
+ --  --results <- openGetListResults programs
+ --  results <- pOpenExecuteListPrograms programs
+ --  writeOutputs results
+ --  -- Compute hash
+ -- -- let bResults = BU.fromString results
+ --  --let hash = md5 (LB.fromStrict bResults)
+ --  -- Create zip
+ --  -- s1 <- mkEntrySelector outputs
+ --  -- createArchive outputsZip (addEntry Deflate bResults s1)
+ --  -- s2 <- mkEntrySelector hashF
+ --  -- withArchive outputsZip (addEntry Deflate (md5DigestBytes hash) s2) 
+ --  putStrLn "Everything is fine :)"

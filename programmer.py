@@ -76,12 +76,18 @@ def write_program(filename, size, ptype):
     """
     filename += ".imp"
     f = open(filename, "w")
-    f.write("0\n0\n")
     f.write(ptype(int(size)))
     f.close()
     
 # Write program to filename
-if len(sys.argv) < 3:
-    print("Use: python programmer.py <#registers> <program_name>")
-else: 
-    write_program(sys.argv[2], sys.argv[1], lots_of_accesses)
+if len(sys.argv) < 4:
+    raise ValueError("Use: python programmer.py <#registers> <program_name> memory/accesses")
+else:
+    writing_f = None
+    if sys.argv[3] == "memory":
+        writing_f = lots_of_memory
+    elif sys.argv[3] == "accesses":
+        writing_f = lots_of_accesses
+    else:
+        raise ValueError("Use: python programmer.py <#registers> <program_name> memory/accesses")
+    write_program(sys.argv[2], sys.argv[1], writing_f)

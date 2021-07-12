@@ -7,10 +7,9 @@ Mantainer:   agua@ciencias.unam.mx
 module ProgramHandler where
 
 import System.IO
+import qualified System.IO.Strict as IOS
 
--- Folder containing program files.
-folder = "programs/"
--- File extension for our programs.
+-- | File extension for our programs.
 extension = ".imp"
 
 {- | The 'openProgram' function opens a program file by adding
@@ -21,6 +20,6 @@ extension = ".imp"
 openProgram :: String -> IO String
 openProgram p = do
   programHandle <- openFile
-                   (folder ++ p ++ extension) ReadMode
-  contents <- hGetContents programHandle
+                   (p ++ extension) ReadMode
+  contents <- IOS.hGetContents programHandle
   return contents
