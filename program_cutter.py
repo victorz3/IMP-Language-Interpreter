@@ -44,4 +44,5 @@ def write_numbers(i, j):
     for n in range(i, j):
         f.write(str(n)+"\n");
 
-write_numbers(0, 500001)            
+write_numbers(0, 400000)            
+#cut("programs500000-1000000.txt", 500000)

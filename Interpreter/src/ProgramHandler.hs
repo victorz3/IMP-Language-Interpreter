@@ -19,7 +19,5 @@ extension = ".imp"
 -}
 openProgram :: String -> IO String
 openProgram p = do
-  programHandle <- openFile
-                   (p ++ extension) ReadMode
-  contents <- IOS.hGetContents programHandle
+  contents <- IOS.readFile (p ++ extension)
   return contents

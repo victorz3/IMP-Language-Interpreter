@@ -3,62 +3,59 @@
      Maintainer:  agua@ciencias.unam.mx
 -}
 
-import Codec.Archive.Zip
 import qualified Control.Monad.Parallel as P
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.UTF8 as BU
-import Data.Digest.Pure.MD5
-import qualified Eval
+import Data.Digest.Pure.SHA
+import qualified Eval as E
 import qualified Language
+import qualified Output
 import Parser
 import qualified ProgramHandler
+import System.Environment
 import System.IO
 import Text.ParserCombinators.Parsec
 import Text.Read
 import qualified Util
 
 -- | 'dataFolder' is the folder where our program data is contained.
-dataFolder = "../Data/Testing/LotsOfAccesses/"
-
+dataFolder = "../Data/"
+ 
 -- | 'programsFolder' is the folder where the programs to run are contained.
-programsFolder = dataFolder ++ ""
+programsFolder = dataFolder ++ "programs/"
 
 -- | 'programsFile is the file containing the names of the programs to run.
-programsFile = dataFolder ++ "programs.txt"
+programsFile = dataFolder ++ "programs3.txt"
 
 {- | 'outputs' is the name of the file where the outputs of the programs
      will be written.
 -}
-outputs = dataFolder ++ "outputs.txt"
-
--- | 'outputsZip' is the name for the zip file containing the program's outputs.
-outputsZip = dataFolder ++ "outputs2.zip"
+outputs = dataFolder ++ "outputs3.txt"
 
 -- | 'hash' is the file to contain the MD5 of the outputs file. 
-hashF = "hash.txt"
-
+hashF = dataFolder ++ "hash3.txt"
 
 {- | 'openGetProgramResult' opens a program, executes it, and returns its
      resulting 'String' wrapped in the 'IO' monad.
      The resulting 'String' is of the form:
-     program# result len(program) steps_taken
+     program# result steps_taken
 -}
-openGetProgramResult :: String -> IO String
-openGetProgramResult p = do
+openGetProgramResult :: String -> (E.State -> String) -> IO String
+openGetProgramResult p resFunction= do
+  putStrLn ("Program: " ++ p)
   contents <- ProgramHandler.openProgram (programsFolder ++ p)
   let halt = head $ lines contents
   let haltN = readMaybe halt :: Maybe Int
   let hP = case haltN of
         Just x -> x
         Nothing -> 0
-  case parse optionalHPProgram "(stdin)" contents of
+  case parse optionalHPProgram "" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
     Right r -> do
-      let result = Eval.executeProgram r hP Eval.getReturnValue
+      let result = E.executeProgram r hP resFunction  
       return (p ++ " " ++
-        (fst result) ++ " " ++ (show (Language.lenP r)) ++
-        " " ++ (show (snd result)) ++ "\n")
+        (fst result) ++ " " ++ (show (snd result)) ++ "\n")
   
 {- | 'openGetProgramResult2' does the same as 'openGetProgramResult' but it uses
      files with the format: #program\n#steps\nprogram
@@ -66,12 +63,12 @@ openGetProgramResult p = do
 openGetProgramResult2 :: String -> IO String
 openGetProgramResult2 p = do
   contents <- ProgramHandler.openProgram p
-  case parse numberedProgramHalt "(stdin)" contents of
+  case parse numberedProgramHalt "" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
     Right r -> do
       let program = Util.thrd r
       let steps = Util.snd r
-      let result = Eval.executeProgram program steps Eval.getReturnValue 
+      let result = E.executeProgram program steps E.getReturnValue 
       return ((show (Util.fst r)) ++ " " ++
                (fst result) ++ " " ++ (show (Language.lenP program)) ++
                " " ++ (show (snd result)) ++ "\n")
@@ -82,12 +79,12 @@ openGetProgramResult2 p = do
 openGetProgramSteps :: String -> IO Int
 openGetProgramSteps p = do
   contents <- ProgramHandler.openProgram p
-  case parse numberedProgramHalt "(stdin)" contents of
+  case parse numberedProgramHalt "" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
     Right r -> do
       let program = Util.thrd r
       let steps = Util.snd r
-      return $ Eval.getStepsHalt program steps      
+      return $ E.getStepsHalt program steps      
     
 {- | 'uOpenGetProgramResult' is an unsafe version of 'openGetProgramResult'
      that doesn't take into account the halting parameter.
@@ -98,7 +95,7 @@ uOpenGetProgramResult p = do
   case parse program "" contents of
     Left e -> error ("Error parsing program " ++ p ++ " : " ++ (show e))
     Right r -> do
-      return (Eval.uExecuteProgram r Eval.getReturnValue)
+      return (E.uExecuteProgram r E.getReturnValue)
   
 {- | 'openExecuteAppendProgram' opens and executes a program file with the
      following format:
@@ -112,7 +109,7 @@ uOpenGetProgramResult p = do
 -}
 openExecuteAppendProgram :: String -> IO ()
 openExecuteAppendProgram programName = do
-  result <- openGetProgramResult programName
+  result <- openGetProgramResult programName E.getReturnValue--Output.concatOutpu
   appendFile outputs $ result
 
 {- | 'openGetListResults' opens a list of programs an returns a 'String' with the
@@ -122,14 +119,11 @@ openGetListResults :: [String] -> IO [String]
 openGetListResults [] = do
   return []
 openGetListResults (p:rest) = do
-  resP <- openGetProgramResult p
+  resP <- openGetProgramResult p E.getReturnValue--Output.concatOutpu
   resL <- openGetListResults rest
   return (resP:resL)
   
-{- | 'openExecuteListPrograms' reads a list of program names, opens and executes
-     each program in the list.
-     This function is sequential.
--}
+{-# DEPRECATED openExecuteListPrograms "Use openGetListResults and writeOutputs instead" #-}
 openExecuteListPrograms :: [String] -> IO ()
 openExecuteListPrograms [] = do return ()
 openExecuteListPrograms (p:r) = do
@@ -141,8 +135,17 @@ openExecuteListPrograms (p:r) = do
 -} 
 pOpenExecuteListPrograms :: [String] -> IO [String]
 pOpenExecuteListPrograms l = do
-  list <- P.mapM openGetProgramResult l
+  list <- P.mapM (\p -> openGetProgramResult p E.getReturnValue) l 
   return list
+
+
+pOpenExecuteListPrograms2 :: [String] -> Int -> IO [String]
+pOpenExecuteListPrograms2 l m = do
+  let lMax = take m l
+  let lRest = drop m l
+  list <- P.mapM (\p -> openGetProgramResult p E.getReturnValue) lMax
+  writeOutputs list
+  pOpenExecuteListPrograms2 lRest m
 
 writeOutputs :: [String] -> IO ()
 writeOutputs [] = do return ()
@@ -152,25 +155,17 @@ writeOutputs (o:l) = do
   
 main :: IO ()
 main = do
-  result <- uOpenGetProgramResult "prueba100"
-  putStrLn result
-
-
-
-
-
-  -- hanP <- openFile programsFile ReadMode
- --  c <- hGetContents hanP
- --  let programs = lines c
- --  --results <- openGetListResults programs
- --  results <- pOpenExecuteListPrograms programs
- --  writeOutputs results
- --  -- Compute hash
- -- -- let bResults = BU.fromString results
- --  --let hash = md5 (LB.fromStrict bResults)
- --  -- Create zip
- --  -- s1 <- mkEntrySelector outputs
- --  -- createArchive outputsZip (addEntry Deflate bResults s1)
- --  -- s2 <- mkEntrySelector hashF
- --  -- withArchive outputsZip (addEntry Deflate (md5DigestBytes hash) s2) 
- --  putStrLn "Everything is fine :)"
+  args <- getArgs
+  hanP <- openFile programsFile ReadMode
+  c <- hGetContents hanP
+  let programs = lines c
+  results <-
+    if (length args) == 0 || head args /= "-par" 
+    then openGetListResults programs
+    else pOpenExecuteListPrograms programs
+  writeOutputs results
+  -- Compute hash
+  let bResults = BU.fromString c
+  let hash = sha256 (LB.fromStrict bResults)
+  appendFile hashF (showDigest hash)
+  putStrLn "Everything is fine :)"

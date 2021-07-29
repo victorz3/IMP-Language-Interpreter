@@ -28,6 +28,7 @@ public class Conn{
 	    Class.forName("org.sqlite.JDBC");
 	    // Initialize connection.
 	    c = DriverManager.getConnection("jdbc:sqlite:db/" + db_name); 
+	    c.setAutoCommit(false);
 	    stmt = c.createStatement();
 	}catch (Exception e) {
 		System.err.println(e.getClass().getName() +
@@ -79,6 +80,6 @@ public class Conn{
      */
     public void close(){
 	try { if (stmt != null) stmt.close(); } catch (Exception e) {};
-	try { if (c != null) c.close(); } catch (Exception e) {};
+	try { if (c != null){c.commit(); c.close();} } catch (Exception e) {};
     }
 }

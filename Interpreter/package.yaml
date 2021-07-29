@@ -26,10 +26,9 @@ dependencies:
 - integer-logarithms
 - monad-parallel >= 0.7.2.3
 - parsec
-- pureMD5
 - strict
+- SHA
 - utf8-string
-- zip
 
 library:
   source-dirs: src

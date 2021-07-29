@@ -1,5 +1,6 @@
 package mx.unam.universaldist;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -19,6 +20,7 @@ public class UniversalDistribution{
     // Universal distribution table name.
     private static final String universalDistTable = "universal_dist";
     
+
     /**
      * Returns the connection to the database.
      * @return The connection to the database. 
@@ -181,6 +183,23 @@ public class UniversalDistribution{
 	return true;
     }
 
+    
+    /* Returns the length of the number n in a base b, prefix-free
+     * enumeration. This method doesn't work for powers of 2.
+     */
+    public int numLength(int n, int b){
+	// Base 2 logarithm of b.
+        double base2Log = Math.log(b) / Math.log(2);
+	// Digits to be used per character.
+	int digits = (int) Math.ceil(base2Log);
+	if(n == 0)
+	    return 2*digits;
+	int baseBLog = (int) (Math.log(n) / Math.log(b));
+	System.out.println("¿Cuánto vale este logarimo wtf?: " + baseBLog);
+	return (baseBLog + 2) * digits;
+    }
+    
+    
     /**
      * Writes the result of an execution in the database. 
      * @param result - Result of an execution in the format "program# result 
@@ -194,20 +213,23 @@ public class UniversalDistribution{
 		return false;
 	    // Dividing the string by its parts.
 	    String[] parts = result.split(" ");
-	    // Insert program statement.
-	    String u = String.format("INSERT INTO %s VALUES(%s, \"%s\", %s, %s)",
-				     progTable, parts[0], parts[1], parts[2],
+	    int length = numLength(Integer.parseInt(parts[0]), 15);
+	    String u = String.format("INSERT INTO %s VALUES(%s, \"%s\", %d, %s)",
+				     progTable, parts[0], parts[1], length,
 				     parts[3]);
-	    Conn c = getConnection();
+      	    Conn c = getConnection();
 	    c.update(u);
 	    // Now update universal distribution.
 	    if(parts[1].equals("err"))
 		return false;
 	    System.out.println("Program: " + parts[0]);
-	    double value = getUniversalDist(parts[1]);
-	    value += Math.pow(2, -1*Integer.parseInt(parts[2]));
-	    u = String.format("REPLACE INTO %s VALUES(\"%s\", %f)",
-			      universalDistTable, parts[1], value);
+	    BigDecimal value = new BigDecimal(getUniversalDist(parts[1]));
+	    BigDecimal power = (new BigDecimal(2)).pow(length);
+	    
+	    value = value.add(BigDecimal.ONE.divide(power));
+	    	    
+	    u = String.format("REPLACE INTO %s VALUES(\"%s\", %s)",
+			      universalDistTable, parts[1], value.toString());
 	    c.update(u);
 	}catch(SQLException e){
 	    System.err.println(e.getMessage());

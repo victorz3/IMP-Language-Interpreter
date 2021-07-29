@@ -19,7 +19,7 @@ import Text.Read
 import qualified Util
 
 -- | 'dataFolder' is the folder where our program data is contained.
-dataFolder = "../Data/Testing/LotsOfMemory/"
+dataFolder = "../Data/Testing/LotsOfAccesses/"
 
 -- | 'programsFolder' is the folder where the programs to run are contained.
 programsFolder = dataFolder ++ ""

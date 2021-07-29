@@ -42,26 +42,20 @@ data Loc
   = Loc Int -- | A location corresponding to the ith register, where i is
             --   the 'Int' parameter.
   deriving (Show, Eq)
- 
-{- | 'lenP' returns the length of a program. Length is computed with the
-     following formula:
-     #non-integer-AST-nodes + #integer-bits
-     where #integer-bits is the number of bits needed to represent all the
-    integers in the program.
+
+
+{- | 'lenInt' returns the number of characters used to represent an integer
 -}
-lenP :: Program -> Int
-lenP Skip = 1
-lenP (Assign l a) = 1 + (lenL l) + (lenA a)
-lenP (Concat p1 p2) = 1 + (lenP p1) + (lenP p2)
-lenP (If b p1 p2) = 1 + (lenB b) + (lenP p1) + (lenP p2)
-lenP (While b p) = 1 + (lenB b) + (lenP p)
-lenP NoHalt = 1
+lenInt :: (Integral a, Show a) => a -> Int
+lenInt n = length $ show n
+
 
 {- | 'lenL' returns the length of a location in AST length. The length of
      the location is computed with the formula 1 + #integer-bits
 -}
-lenL :: Loc -> Int
-lenL (Loc n) = 1 + (lenInt n)
+lenLoc :: Loc -> Int
+lenLoc (Loc n) = 3 + (lenInt n)
+
 
 {- | 'lenA' returns the length of an arithmetic expression in AST length.
      The length of the AE is computed with the same formula used for
@@ -69,31 +63,42 @@ lenL (Loc n) = 1 + (lenInt n)
 -}
 lenA :: Arit -> Int
 lenA (In n) = lenInt n
-lenA (Mem l) = lenL l
-lenA (Plus a1 a2) = 1 + (lenA a1) + (lenA a2)
-lenA (Minus a1 a2) = 1 + (lenA a1) + (lenA a2)
-lenA (Times a1 a2) = 1 + (lenA a1) + (lenA a2)
+lenA (Mem l) = lenLoc l
+lenA (Plus a1 a2) = 5 + (lenA a1) + (lenA a2)
+lenA (Minus a1 a2) = 5 + (lenA a1) + (lenA a2)
+lenA (Times a1 a2) = 5 + (lenA a1) + (lenA a2)
+
 
 {- | 'lenB' returns the length of a boolean expression in AST length.
      The length of the BE is computed with the same formula used for
      programs, taking into account ABE ASTs instead of program ASTs.
 -}
 lenB :: BoolExp -> Int
-lenB T = 1
-lenB F = 1
-lenB (Equals a1 a2) = 1 + (lenA a1) + (lenA a2)
-lenB (Lessthan a1 a2) = 1 + (lenA a1) + (lenA a2)
+lenB T = 4
+lenB F = 5
+lenB (Equals a1 a2) = 5 + (lenA a1) + (lenA a2)
+lenB (Lessthan a1 a2) = 5 + (lenA a1) + (lenA a2)
 lenB (Not b) = 1 + (lenB b)
-lenB (Or b1 b2) = 1 + (lenB b1) + (lenB b2)
-lenB (And b1 b2) = 1 + (lenB b1) + (lenB b2)
+lenB (Or b1 b2) = 5 + (lenB b1) + (lenB b2)
+lenB (And b1 b2) = 5 + (lenB b1) + (lenB b2)
 
-{- | 'lenInt' returns the number of bits required to represent an
-     'Integral'
+
+{- | 'lenP' returns the length of a program. Length is computed with the
+     following formula:
+     #non-integer-AST-nodes + #integer-bits
+     where #integer-bits is the number of bits needed to represent all the
+    integers in the program.
 -}
-lenInt :: Integral a => a -> Int
-lenInt 0 = 1
-lenInt 1 = 1
-lenInt n = 1 + (lenInt (div n 2))
+lenPAux :: Program -> Int
+lenPAux Skip = 4
+lenPAux (Assign l a) = 4 + (lenLoc l) + (lenA a)
+lenPAux (Concat p1 p2) = 3 + (lenPAux p1) + (lenPAux p2)
+lenPAux (If b p1 p2) = 17 + (lenB b) + (lenPAux p1) + (lenPAux p2)
+lenPAux (While b p) = 12 + (lenB b) + (lenPAux p)
+lenPAux NoHalt = -1
+
+lenP :: Program -> Int
+lenP p = 6 * (lenPAux p)
 
 -- | 'locToArit' casts a 'Loc' into an 'Arit'.
 locToArit :: Loc -> Arit

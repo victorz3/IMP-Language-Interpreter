@@ -8,7 +8,8 @@ import qualified ProgramHandler
 import Text.ParserCombinators.Parsec
 import Util
 
-dataFolder = "../Data/Testing/LotsOfMemory/"
+-- | 'dataFolder' is the folder where our program data is contained.
+dataFolder = "../Data/Testing/LotsOfAccesses/"
 
 {- | 'openGetProgramResult' opens a program, executes it, and returns its
      resulting 'String' wrapped in the 'ST' monad.

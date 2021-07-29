@@ -8,6 +8,7 @@ Mantainer:   agua@ciencias.unam.mx
 module Output where
 
 import Data.Char (intToDigit)
+import Data.Maybe
 import Math.NumberTheory.Logarithms
 import Numeric (showIntAtBase)
 
@@ -50,7 +51,14 @@ getStringFromTuple (n, m)
      representations of the numbers in a state 'List'.
 
 -}
-concatOutput :: [(Int, Integer)] -> String
-concatOutput [] = ""
-concatOutput (x:xs) = (showIntAtBase 2 intToDigit (snd x) "") ++
-                      (concatOutput xs)
+concatOutput :: ([(Int, Integer)], Int) -> String
+concatOutput ([], _) = "Ɛ"
+concatOutput s = if (fromMaybe 0 (lookup 0 (fst s))) < 0
+                 then "err"
+                 else concatOutputAux s
+
+
+concatOutputAux :: ([(Int, Integer)], Int) -> String
+concatOutputAux ([], _) = ""
+concatOutputAux ((x:xs), size) = (showIntAtBase 2 intToDigit (snd x) "") ++
+                                 (concatOutputAux (xs, size))

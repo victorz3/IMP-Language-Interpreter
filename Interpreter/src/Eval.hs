@@ -330,11 +330,6 @@ execListPrograms :: [(Program, Int)] -> (State -> String) -> [(String, Int)]
 execListPrograms lop outF = map (\t -> executeProgram (fst t) (snd t) outF) lop
 
 
--- TODO: Parallelize execution.
--- parExecListPrograms :: [(Program, Int)] -> (State -> String) -> [(String, Int)]
--- parExecListPrograms lop outF = 
-
-
 {- | 'getStepsHalt' takes a program and a halting parameter and it returns the
      number of steps the program took to halt.
 -}
