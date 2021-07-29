@@ -4,9 +4,7 @@
 -}
 
 import qualified Control.Monad.Parallel as P
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as LB
-import qualified Data.ByteString.UTF8 as BU
 import Data.Digest.Pure.SHA
 import qualified Eval as E
 import qualified Language
@@ -165,7 +163,7 @@ main = do
     else pOpenExecuteListPrograms programs
   writeOutputs results
   -- Compute hash
-  let bResults = BU.fromString c
-  let hash = sha256 (LB.fromStrict bResults)
+    bResults <- LB.readFile outputs
+  let hash = sha256 bResults
   appendFile hashF (showDigest hash)
   putStrLn "Everything is fine :)"

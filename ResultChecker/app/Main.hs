@@ -4,11 +4,10 @@
 -}
 
 import Control.Monad
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as LB
-import Data.Digest.Pure.MD5
+import Data.Digest.Pure.SHA
 import qualified Eval
-import qualified ProgramHandler
+import qualified ProgramHandler as H
 import Data.Sort
 import Data.Time.Clock
 import Language
@@ -26,25 +25,25 @@ dataFolder = "../Data/"
 programsFolder = dataFolder ++ "programs/"
 
 -- | Name of file with the hash code.
-hashFile = dataFolder ++ "hash.txt"
+hashFile = dataFolder ++ "hash3.txt"
 
 -- | Name of file containing the results of execution.
-results = dataFolder ++ "outputs.txt"
+results = dataFolder ++ "outputs3.txt"
 
 -- | File containing numbers for executed programs.
-programs = dataFolder ++ "programs2.txt"
+programs = dataFolder ++ "programs3.txt"
 
 -- | Number of files to cross-check
 checks = 3
 
 {- | 'openGetProgramResult' opens a program, executes it, and returns its
-     resulting 'String' wrapped in the 'IO' monad.
+     resulting 'String' wrapped in the 'I2O' monad.
      The resulting 'String' is of the form:
      program# result len(program) steps_taken
 -}
 openGetProgramResult :: String -> IO String
 openGetProgramResult p = do
-  contents <- ProgramHandler.openProgram (programsFolder ++ p)
+  contents <- H.openProgram (programsFolder ++ p)
   let halt = head $ lines contents
   let haltN = readMaybe halt :: Maybe Int
   let hP = case haltN of
@@ -101,7 +100,7 @@ checkProgramResult p r = do
 openExecuteCheck :: String -> IO Bool 
 openExecuteCheck program = do
   result <- openGetProgramResult program
-  let output = ProgramHandler.getOutput result
+  let output = H.getOutput result
   rv <- checkProgramResult program output
   return rv
 
@@ -116,11 +115,11 @@ openExecuteCheck program = do
 isOutputFileValid :: IO Bool
 isOutputFileValid = do
   -- First, get value of hash.
-  hash <- B.readFile hashFile
+  hash <- readFile hashFile
   -- Now read file bytes.
   fileContent <- LB.readFile results 
-  -- Compute md5
-  let hash2 = md5DigestBytes $ md5 fileContent
+  -- Compute SHA256
+  let hash2 =  showDigest $ sha256 fileContent
   -- Check if hashes match
   let b = hash /= hash2
   if b then (return False)

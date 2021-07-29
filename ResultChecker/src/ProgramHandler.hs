@@ -25,7 +25,7 @@ openProgram p = do
   return contents
 
 {- | 'getOutput' gets the output out of a line of the form:
-     program# program_output len(program)
+     program# program_output steps
 -}
 getOutput :: String -> String
 getOutput line = let w = words line in

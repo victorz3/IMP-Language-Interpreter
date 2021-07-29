@@ -24,8 +24,8 @@ dependencies:
 - bytestring
 - integer-logarithms
 - parsec
-- pureMD5
 - random
+- SHA
 - sort
 - strict
 - time
