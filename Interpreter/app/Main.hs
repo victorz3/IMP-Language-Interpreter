@@ -110,15 +110,15 @@ openExecuteAppendProgram programName = do
   result <- openGetProgramResult programName E.getReturnValue--Output.concatOutpu
   appendFile outputs $ result
 
-{- | 'openGetListResults' opens a list of programs an returns a 'String' with the
-     results of the execution.
+{- | 'openGetListResults' opens a list of programs an returns an 'IO [String]'
+     with with the results of the execution.
 -}
-openGetListResults :: [String] -> IO [String]
-openGetListResults [] = do
-  return []
-openGetListResults (p:rest) = do
-  resP <- openGetProgramResult p E.getReturnValue--Output.concatOutpu
-  resL <- openGetListResults rest
+openGetListResults :: [String] -> (E.State -> String) -> IO [String]
+openGetListResults [] _ = do
+  return [] 
+openGetListResults (p:rest) f = do
+  resP <- openGetProgramResult p f
+  resL <- openGetListResults rest f
   return (resP:resL)
   
 {-# DEPRECATED openExecuteListPrograms "Use openGetListResults and writeOutputs instead" #-}
@@ -159,11 +159,11 @@ main = do
   let programs = lines c
   results <-
     if (length args) == 0 || head args /= "-par" 
-    then openGetListResults programs
+    then openGetListResults programs E.getReturnValue
     else pOpenExecuteListPrograms programs
   writeOutputs results
   -- Compute hash
-    bResults <- LB.readFile outputs
+  bResults <- LB.readFile outputs
   let hash = sha256 bResults
   appendFile hashF (showDigest hash)
   putStrLn "Everything is fine :)"
