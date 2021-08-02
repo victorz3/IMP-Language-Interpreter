@@ -1,4 +1,4 @@
-package mx.unam.universaldist;
+package mx.unam.universaldist.db;
 
 /**
  * Class for handling connections to the database. 

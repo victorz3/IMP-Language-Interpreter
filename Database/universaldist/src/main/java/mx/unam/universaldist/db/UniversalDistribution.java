@@ -1,4 +1,4 @@
-package mx.unam.universaldist;
+package mx.unam.universaldist.db;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
