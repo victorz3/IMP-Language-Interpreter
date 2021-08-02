@@ -184,18 +184,23 @@ public class UniversalDistribution{
     }
 
     
-    /* Returns the length of the number n in a base b, prefix-free
-     * enumeration. This method doesn't work for powers of 2.
+    /** 
+     * Returns the length of the program in a base b, prefix-free
+     * enumeration.
+     * @param program - Number of the program.
+     * @param b - Base.
+     * @return The length of the program in base b.
      */
-    public int numLength(int n, int b){
+    public int numLength(int program, int b){
+	if(b == 1)
+	    return program+1;
 	// Base 2 logarithm of b.
         double base2Log = Math.log(b) / Math.log(2);
 	// Digits to be used per character.
-	int digits = (int) Math.ceil(base2Log);
-	if(n == 0)
+	int digits = (int) Math.floor(base2Log) + 1;
+	if(program == 0)
 	    return 2*digits;
-	int baseBLog = (int) (Math.log(n) / Math.log(b));
-	System.out.println("¿Cuánto vale este logarimo wtf?: " + baseBLog);
+	int baseBLog = (int) (Math.log(program) / Math.log(b));
 	return (baseBLog + 2) * digits;
     }
     
