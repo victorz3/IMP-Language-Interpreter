@@ -1,3 +1,4 @@
-mx/unam/universaldist/UniversalDistribution.class
-mx/unam/universaldist/Conn.class
+mx/unam/universaldist/db/UniversalDistribution.class
 mx/unam/universaldist/App.class
+mx/unam/universaldist/util/Util.class
+mx/unam/universaldist/db/Conn.class

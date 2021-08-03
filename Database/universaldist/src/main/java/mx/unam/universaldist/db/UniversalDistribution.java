@@ -158,7 +158,7 @@ public class UniversalDistribution{
 	    value = r.getDouble(1);
 	return value;
     }
-
+    
     
     /**
      * Returns true if the program has already been inserted into the database
@@ -183,6 +183,26 @@ public class UniversalDistribution{
 	return true;
     }
 
+    /**
+     * Returns true if the program has already been inserted into the database
+     * and false otherwise.
+     * @param program - The program's number.
+     * @return true if the program was already inserted and false otherwise.
+     */
+    public boolean inserted(long program){
+	try{
+	    Conn c = getConnection();
+	    // Query program
+	    String q = String.format("SELECT * FROM %s WHERE number = %d",
+				     progTable, program);
+	    // Result set for the query.
+	    ResultSet r = c.query(q);
+	    return r.isBeforeFirst();
+	}catch(SQLException e){
+	    System.err.println(e.getMessage());
+	}
+	return true;
+    }
     
     /** 
      * Returns the length of the program in a base b, prefix-free
