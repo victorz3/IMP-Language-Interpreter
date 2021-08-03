@@ -238,7 +238,7 @@ public class UniversalDistribution{
 		return false;
 	    // Dividing the string by its parts.
 	    String[] parts = result.split(" ");
-	    int length = numLength(Integer.parseInt(parts[0]), 15);
+	    int length = numLength(Integer.parseInt(parts[0]), 7);
 	    String u = String.format("INSERT INTO %s VALUES(%s, \"%s\", %d, %s)",
 				     progTable, parts[0], parts[1], length,
 				     parts[3]);
