@@ -1,4 +1,4 @@
-IMP LANGUAGE INTERPRETER
+# IMP LANGUAGE INTERPRETER
 
 This is an interpreter for the IMP language. The IMP language is the one
 specified by the following grammar:
@@ -18,13 +18,13 @@ The interpreter includes the following features:
   be specified as a number in the first line of a program file.<br/>
 - Checking of results' correctness.<br/>
 
-------------------------------PREREQUISITES------------------------------------
+------------------------------PREREQUISITES------------------------------------<br/>
 Install The Haskell Tool Stack. Instructions can be found on the official
-website:
+website:<br/>
 https://docs.haskellstack.org/en/stable/README/#how-to-install
 
 
-------------------------------INSTRUCTIONS-------------------------------------
+------------------------------INSTRUCTIONS-------------------------------------<br/>
 To run a list of programs the `Data` folder must contain:<br/>
 1) The list of programs to run, one per line, in a file named `programs.txt`.<br/>
 2) The programs to run in the `programs` folder. The programs must be correct
