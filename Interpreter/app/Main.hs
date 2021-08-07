@@ -24,15 +24,15 @@ dataFolder = "../Data/"
 programsFolder = dataFolder ++ "programs/"
 
 -- | 'programsFile is the file containing the names of the programs to run.
-programsFile = dataFolder ++ "programs3.txt"
+programsFile = dataFolder ++ "programs.txt"
 
 {- | 'outputs' is the name of the file where the outputs of the programs
      will be written.
 -}
-outputs = dataFolder ++ "outputs3.txt"
+outputs = dataFolder ++ "outputs.txt"
 
 -- | 'hash' is the file to contain the MD5 of the outputs file. 
-hashF = dataFolder ++ "hash3.txt"
+hashF = dataFolder ++ "hash.txt"
 
 {- | 'openGetProgramResult' opens a program, executes it, and returns its
      resulting 'String' wrapped in the 'IO' monad.
@@ -166,4 +166,4 @@ main = do
   bResults <- LB.readFile outputs
   let hash = sha256 bResults
   appendFile hashF (showDigest hash)
-  putStrLn "Everything is fine :)"
+  putStrLn "Execution complete :)"

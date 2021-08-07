@@ -25,13 +25,13 @@ dataFolder = "../Data/"
 programsFolder = dataFolder ++ "programs/"
 
 -- | Name of file with the hash code.
-hashFile = dataFolder ++ "hash3.txt"
+hashFile = dataFolder ++ "hash.txt"
 
 -- | Name of file containing the results of execution.
-results = dataFolder ++ "outputs3.txt"
+results = dataFolder ++ "outputs.txt"
 
 -- | File containing numbers for executed programs.
-programs = dataFolder ++ "programs3.txt"
+programs = dataFolder ++ "programs.txt"
 
 -- | Number of files to cross-check
 checks = 3
