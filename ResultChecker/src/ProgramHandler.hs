@@ -1,7 +1,7 @@
 {- |
 Module:      ProgramHandler 
 Description: This library is for opening and handling program
-              files in our language (while).
+             files in our language (while).
 Mantainer:   agua@ciencias.unam.mx
 -}
 module ProgramHandler where

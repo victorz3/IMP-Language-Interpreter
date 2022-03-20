@@ -13,7 +13,7 @@ import java.sql.Statement;
 
 public class Conn{
 
-    private static final String db_name = "distribution.db";
+    private static final String db_name = "distribution2.db";
     
     private Connection c = null; /* Connection to the database. */
     private Statement stmt = null; 

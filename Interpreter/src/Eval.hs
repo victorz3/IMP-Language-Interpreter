@@ -39,13 +39,13 @@ getValue (l, _) i = fromMaybe 0 (lookup i l)
 getTotalMem :: State -> Int
 getTotalMem (_, m) = m
                
-replace :: Int -> State -> Integer -> State
-replace n ([], m) i = ([(n, i)], m + Util.sizeOf(i)) 
-replace n ((a, b):xs, m) i = if n == a
+update :: Int -> State -> Integer -> State
+update n ([], m) i = ([(n, i)], m + Util.sizeOf(i)) 
+update n ((a, b):xs, m) i = if n == a
                              then let s1 = Util.sizeOf(b)
                                       s2 = Util.sizeOf(i)
                                   in ((n, i):xs, m - s1 + s2)  
-                             else let r = replace n (xs, m) i
+                             else let r = update n (xs, m) i
                                   in ((a, b):(fst r), snd r)
   
 {- | 'simplBoolExp' simplifies easy-to-simplify 'BoolExp's. For example, it
@@ -115,7 +115,7 @@ simplBoolProgram x = x
 -}
 eval :: Program -> State -> State
 eval Skip s = s
-eval (Assign (Loc x) a) s = replace x s (evalArit a s)
+eval (Assign (Loc x) a) s = update x s (evalArit a s)
 eval (Concat p1 p2) s = let sNew = (eval p1 s)
                         in (eval p2 sNew)
 eval (If b p1 p2) s = if (evalBool b s)
@@ -156,9 +156,9 @@ evalBool (And b1 b2) s = ((evalBool b1 s) && (evalBool b2 s))
      is the number of steps taken.
 -}
 evalWH :: Program -> State -> Int -> Int -> (State, Int, Int)
-evalWH NoHalt st h s = (replace 0 st (-1), h, s)
+evalWH NoHalt st h s = (update 0 st (-1), h, s)
 evalWH p st h s = if (h <= 0)
-                  then (replace 0 st (-1), 0, s)
+                  then (update 0 st (-1), 0, s)
                   else (evalWHStep p st h s)
 
 {- | 'evalWHStep' evaluates one step and then checks the halting condition
@@ -170,7 +170,7 @@ evalWH p st h s = if (h <= 0)
 evalWHStep :: Program -> State -> Int -> Int -> (State, Int, Int)
 evalWHStep Skip st h s = (st, h - 1, s + 1)
 evalWHStep (Assign (Loc x) a) st h s = let p = (evalAritWH a st h s)
-                                       in let st' = replace x st (Util.fst p)
+                                       in let st' = update x st (Util.fst p)
                                               h' = (Util.snd p) - 1
                                               s' = (Util.thrd p) + 1
                                           in if getTotalMem st' > maxMemory

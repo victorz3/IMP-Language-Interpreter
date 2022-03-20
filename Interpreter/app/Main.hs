@@ -41,7 +41,7 @@ hashF = dataFolder ++ "hash.txt"
 -}
 openGetProgramResult :: String -> (E.State -> String) -> IO String
 openGetProgramResult p resFunction= do
-  putStrLn ("Program: " ++ p)
+  --putStrLn ("Program: " ++ p)
   contents <- ProgramHandler.openProgram (programsFolder ++ p)
   let halt = head $ lines contents
   let haltN = readMaybe halt :: Maybe Int
